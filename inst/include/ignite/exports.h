@@ -30,13 +30,25 @@ IGNITE_API void ignite_last_error_clear();
 IGNITE_API void* _ignite_sgd (void* params, double lr, double momentum, double dampening, double weight_decay, bool nesterov);
 IGNITE_API void _ignite_sgd_step (void* opt);
 IGNITE_API void _ignite_sgd_zero_grad (void* opt);
-IGNITE_API void* _ignite_run_script_module (void* network, void* loss_fn, void* input, void* target, void* optimizer);
-IGNITE_API void* _ignite_forward (void* input, void* weights, void* bias, void* old_h, void* old_cell);
-IGNITE_API void* _ignite_backward (void* grad_h, void* grad_cell, void* new_cell, void* input_gate, void* output_gate, void* candidate_cell, void* X, void* gate_weights, void* weights);
+IGNITE_API void* _ignite_adam (void* params, double lr, double beta1, double beta2, double eps, double weight_decay, bool amsgrad);
+IGNITE_API void _ignite_adam_step (void* opt);
+IGNITE_API void _ignite_adam_zero_grad (void* opt);
+IGNITE_API void* _ignite_adamw (void* params, double lr, double beta1, double beta2, double eps, double weight_decay, bool amsgrad);
+IGNITE_API void _ignite_adamw_step (void* opt);
+IGNITE_API void _ignite_adamw_zero_grad (void* opt);
+IGNITE_API void* _ignite_adagrad (void* params, double lr, double lr_decay, double weight_decay, double initial_accumulator_value, double eps);
+IGNITE_API void _ignite_adagrad_step (void* opt);
+IGNITE_API void _ignite_adagrad_zero_grad (void* opt);
+IGNITE_API void* _ignite_rmsprop (void* params, double lr, double alpha, double eps, double weight_decay, double momentum, bool centered);
+IGNITE_API void _ignite_rmsprop_step (void* opt);
+IGNITE_API void _ignite_rmsprop_zero_grad (void* opt);
+IGNITE_API void* _ignite_opt_step (void* network, void* loss_fn, void* input, void* target, void* optimizer);
+IGNITE_API void* _ignite_predict_step (void* network, void* input);
 IGNITE_API void _delete_optim_sgd (void* x);
-IGNITE_API void _delete_graph_function (void* x);
-IGNITE_API void _delete_script_module2 (void* x);
-IGNITE_API void _delete_stack2 (void* x);
+IGNITE_API void _delete_optim_adam (void* x);
+IGNITE_API void _delete_optim_adamw (void* x);
+IGNITE_API void _delete_optim_adagrad (void* x);
+IGNITE_API void _delete_optim_rmsprop (void* x);
 
 #ifdef RCPP_VERSION
 inline void* ignite_sgd (void* params, double lr, double momentum, double dampening, double weight_decay, bool nesterov) {
@@ -54,18 +66,73 @@ inline void ignite_sgd_zero_grad (void* opt) {
   host_exception_handler();
   
 }
-inline void* ignite_run_script_module (void* network, void* loss_fn, void* input, void* target, void* optimizer) {
-  auto ret =  _ignite_run_script_module(network, loss_fn, input, target, optimizer);
+inline void* ignite_adam (void* params, double lr, double beta1, double beta2, double eps, double weight_decay, bool amsgrad) {
+  auto ret =  _ignite_adam(params, lr, beta1, beta2, eps, weight_decay, amsgrad);
   host_exception_handler();
   return ret;
 }
-inline void* ignite_forward (void* input, void* weights, void* bias, void* old_h, void* old_cell) {
-  auto ret =  _ignite_forward(input, weights, bias, old_h, old_cell);
+inline void ignite_adam_step (void* opt) {
+   _ignite_adam_step(opt);
+  host_exception_handler();
+  
+}
+inline void ignite_adam_zero_grad (void* opt) {
+   _ignite_adam_zero_grad(opt);
+  host_exception_handler();
+  
+}
+inline void* ignite_adamw (void* params, double lr, double beta1, double beta2, double eps, double weight_decay, bool amsgrad) {
+  auto ret =  _ignite_adamw(params, lr, beta1, beta2, eps, weight_decay, amsgrad);
   host_exception_handler();
   return ret;
 }
-inline void* ignite_backward (void* grad_h, void* grad_cell, void* new_cell, void* input_gate, void* output_gate, void* candidate_cell, void* X, void* gate_weights, void* weights) {
-  auto ret =  _ignite_backward(grad_h, grad_cell, new_cell, input_gate, output_gate, candidate_cell, X, gate_weights, weights);
+inline void ignite_adamw_step (void* opt) {
+   _ignite_adamw_step(opt);
+  host_exception_handler();
+  
+}
+inline void ignite_adamw_zero_grad (void* opt) {
+   _ignite_adamw_zero_grad(opt);
+  host_exception_handler();
+  
+}
+inline void* ignite_adagrad (void* params, double lr, double lr_decay, double weight_decay, double initial_accumulator_value, double eps) {
+  auto ret =  _ignite_adagrad(params, lr, lr_decay, weight_decay, initial_accumulator_value, eps);
+  host_exception_handler();
+  return ret;
+}
+inline void ignite_adagrad_step (void* opt) {
+   _ignite_adagrad_step(opt);
+  host_exception_handler();
+  
+}
+inline void ignite_adagrad_zero_grad (void* opt) {
+   _ignite_adagrad_zero_grad(opt);
+  host_exception_handler();
+  
+}
+inline void* ignite_rmsprop (void* params, double lr, double alpha, double eps, double weight_decay, double momentum, bool centered) {
+  auto ret =  _ignite_rmsprop(params, lr, alpha, eps, weight_decay, momentum, centered);
+  host_exception_handler();
+  return ret;
+}
+inline void ignite_rmsprop_step (void* opt) {
+   _ignite_rmsprop_step(opt);
+  host_exception_handler();
+  
+}
+inline void ignite_rmsprop_zero_grad (void* opt) {
+   _ignite_rmsprop_zero_grad(opt);
+  host_exception_handler();
+  
+}
+inline void* ignite_opt_step (void* network, void* loss_fn, void* input, void* target, void* optimizer) {
+  auto ret =  _ignite_opt_step(network, loss_fn, input, target, optimizer);
+  host_exception_handler();
+  return ret;
+}
+inline void* ignite_predict_step (void* network, void* input) {
+  auto ret =  _ignite_predict_step(network, input);
   host_exception_handler();
   return ret;
 }
@@ -74,18 +141,23 @@ inline void delete_optim_sgd (void* x) {
   host_exception_handler();
   
 }
-inline void delete_graph_function (void* x) {
-   _delete_graph_function(x);
+inline void delete_optim_adam (void* x) {
+   _delete_optim_adam(x);
   host_exception_handler();
   
 }
-inline void delete_script_module2 (void* x) {
-   _delete_script_module2(x);
+inline void delete_optim_adamw (void* x) {
+   _delete_optim_adamw(x);
   host_exception_handler();
   
 }
-inline void delete_stack2 (void* x) {
-   _delete_stack2(x);
+inline void delete_optim_adagrad (void* x) {
+   _delete_optim_adagrad(x);
+  host_exception_handler();
+  
+}
+inline void delete_optim_rmsprop (void* x) {
+   _delete_optim_rmsprop(x);
   host_exception_handler();
   
 }

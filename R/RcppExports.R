@@ -13,32 +13,80 @@ rcpp_ignite_sgd_zero_grad <- function(opt) {
     invisible(.Call('_ignite_rcpp_ignite_sgd_zero_grad', PACKAGE = 'ignite', opt))
 }
 
-rcpp_ignite_run_script_module <- function(network, loss_fn, input, target, optimizer) {
-    .Call('_ignite_rcpp_ignite_run_script_module', PACKAGE = 'ignite', network, loss_fn, input, target, optimizer)
+rcpp_ignite_adam <- function(params, lr, beta1, beta2, eps, weight_decay, amsgrad) {
+    .Call('_ignite_rcpp_ignite_adam', PACKAGE = 'ignite', params, lr, beta1, beta2, eps, weight_decay, amsgrad)
 }
 
-rcpp_ignite_forward <- function(input, weights, bias, old_h, old_cell) {
-    .Call('_ignite_rcpp_ignite_forward', PACKAGE = 'ignite', input, weights, bias, old_h, old_cell)
+rcpp_ignite_adam_step <- function(opt) {
+    invisible(.Call('_ignite_rcpp_ignite_adam_step', PACKAGE = 'ignite', opt))
 }
 
-rcpp_ignite_backward <- function(grad_h, grad_cell, new_cell, input_gate, output_gate, candidate_cell, X, gate_weights, weights) {
-    .Call('_ignite_rcpp_ignite_backward', PACKAGE = 'ignite', grad_h, grad_cell, new_cell, input_gate, output_gate, candidate_cell, X, gate_weights, weights)
+rcpp_ignite_adam_zero_grad <- function(opt) {
+    invisible(.Call('_ignite_rcpp_ignite_adam_zero_grad', PACKAGE = 'ignite', opt))
+}
+
+rcpp_ignite_adamw <- function(params, lr, beta1, beta2, eps, weight_decay, amsgrad) {
+    .Call('_ignite_rcpp_ignite_adamw', PACKAGE = 'ignite', params, lr, beta1, beta2, eps, weight_decay, amsgrad)
+}
+
+rcpp_ignite_adamw_step <- function(opt) {
+    invisible(.Call('_ignite_rcpp_ignite_adamw_step', PACKAGE = 'ignite', opt))
+}
+
+rcpp_ignite_adamw_zero_grad <- function(opt) {
+    invisible(.Call('_ignite_rcpp_ignite_adamw_zero_grad', PACKAGE = 'ignite', opt))
+}
+
+rcpp_ignite_adagrad <- function(params, lr, lr_decay, weight_decay, initial_accumulator_value, eps) {
+    .Call('_ignite_rcpp_ignite_adagrad', PACKAGE = 'ignite', params, lr, lr_decay, weight_decay, initial_accumulator_value, eps)
+}
+
+rcpp_ignite_adagrad_step <- function(opt) {
+    invisible(.Call('_ignite_rcpp_ignite_adagrad_step', PACKAGE = 'ignite', opt))
+}
+
+rcpp_ignite_adagrad_zero_grad <- function(opt) {
+    invisible(.Call('_ignite_rcpp_ignite_adagrad_zero_grad', PACKAGE = 'ignite', opt))
+}
+
+rcpp_ignite_rmsprop <- function(params, lr, alpha, eps, weight_decay, momentum, centered) {
+    .Call('_ignite_rcpp_ignite_rmsprop', PACKAGE = 'ignite', params, lr, alpha, eps, weight_decay, momentum, centered)
+}
+
+rcpp_ignite_rmsprop_step <- function(opt) {
+    invisible(.Call('_ignite_rcpp_ignite_rmsprop_step', PACKAGE = 'ignite', opt))
+}
+
+rcpp_ignite_rmsprop_zero_grad <- function(opt) {
+    invisible(.Call('_ignite_rcpp_ignite_rmsprop_zero_grad', PACKAGE = 'ignite', opt))
+}
+
+rcpp_ignite_opt_step <- function(network, loss_fn, input, target, optimizer) {
+    .Call('_ignite_rcpp_ignite_opt_step', PACKAGE = 'ignite', network, loss_fn, input, target, optimizer)
+}
+
+rcpp_ignite_predict_step <- function(network, input) {
+    .Call('_ignite_rcpp_ignite_predict_step', PACKAGE = 'ignite', network, input)
 }
 
 rcpp_delete_optim_sgd <- function(x) {
     invisible(.Call('_ignite_rcpp_delete_optim_sgd', PACKAGE = 'ignite', x))
 }
 
-rcpp_delete_graph_function <- function(x) {
-    invisible(.Call('_ignite_rcpp_delete_graph_function', PACKAGE = 'ignite', x))
+rcpp_delete_optim_adam <- function(x) {
+    invisible(.Call('_ignite_rcpp_delete_optim_adam', PACKAGE = 'ignite', x))
 }
 
-rcpp_delete_script_module2 <- function(x) {
-    invisible(.Call('_ignite_rcpp_delete_script_module2', PACKAGE = 'ignite', x))
+rcpp_delete_optim_adamw <- function(x) {
+    invisible(.Call('_ignite_rcpp_delete_optim_adamw', PACKAGE = 'ignite', x))
 }
 
-rcpp_delete_stack2 <- function(x) {
-    invisible(.Call('_ignite_rcpp_delete_stack2', PACKAGE = 'ignite', x))
+rcpp_delete_optim_adagrad <- function(x) {
+    invisible(.Call('_ignite_rcpp_delete_optim_adagrad', PACKAGE = 'ignite', x))
+}
+
+rcpp_delete_optim_rmsprop <- function(x) {
+    invisible(.Call('_ignite_rcpp_delete_optim_rmsprop', PACKAGE = 'ignite', x))
 }
 
 ignite_raise_exception <- function() {

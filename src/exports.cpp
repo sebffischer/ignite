@@ -16,30 +16,78 @@ void rcpp_ignite_sgd_zero_grad (ignite::optim_sgd opt) {
    ignite_sgd_zero_grad(opt.get());
 }
 // [[Rcpp::export]]
-torch::Tensor rcpp_ignite_run_script_module (Rcpp::XPtr<XPtrTorchScriptModule> network, Rcpp::XPtr<XPtrTorchFunctionPtr> loss_fn, torch::Tensor input, torch::Tensor target, ignite::optim_sgd optimizer) {
-  return  ignite_run_script_module(network.get(), loss_fn.get(), input.get(), target.get(), optimizer.get());
+ignite::optim_adam rcpp_ignite_adam (torch::TensorList params, double lr, double beta1, double beta2, double eps, double weight_decay, bool amsgrad) {
+  return  ignite_adam(params.get(), lr, beta1, beta2, eps, weight_decay, amsgrad);
 }
 // [[Rcpp::export]]
-torch::TensorList rcpp_ignite_forward (torch::Tensor input, torch::Tensor weights, torch::Tensor bias, torch::Tensor old_h, torch::Tensor old_cell) {
-  return  ignite_forward(input.get(), weights.get(), bias.get(), old_h.get(), old_cell.get());
+void rcpp_ignite_adam_step (ignite::optim_adam opt) {
+   ignite_adam_step(opt.get());
 }
 // [[Rcpp::export]]
-torch::TensorList rcpp_ignite_backward (torch::Tensor grad_h, torch::Tensor grad_cell, torch::Tensor new_cell, torch::Tensor input_gate, torch::Tensor output_gate, torch::Tensor candidate_cell, torch::Tensor X, torch::Tensor gate_weights, torch::Tensor weights) {
-  return  ignite_backward(grad_h.get(), grad_cell.get(), new_cell.get(), input_gate.get(), output_gate.get(), candidate_cell.get(), X.get(), gate_weights.get(), weights.get());
+void rcpp_ignite_adam_zero_grad (ignite::optim_adam opt) {
+   ignite_adam_zero_grad(opt.get());
+}
+// [[Rcpp::export]]
+ignite::optim_adamw rcpp_ignite_adamw (torch::TensorList params, double lr, double beta1, double beta2, double eps, double weight_decay, bool amsgrad) {
+  return  ignite_adamw(params.get(), lr, beta1, beta2, eps, weight_decay, amsgrad);
+}
+// [[Rcpp::export]]
+void rcpp_ignite_adamw_step (ignite::optim_adamw opt) {
+   ignite_adamw_step(opt.get());
+}
+// [[Rcpp::export]]
+void rcpp_ignite_adamw_zero_grad (ignite::optim_adamw opt) {
+   ignite_adamw_zero_grad(opt.get());
+}
+// [[Rcpp::export]]
+ignite::optim_adagrad rcpp_ignite_adagrad (torch::TensorList params, double lr, double lr_decay, double weight_decay, double initial_accumulator_value, double eps) {
+  return  ignite_adagrad(params.get(), lr, lr_decay, weight_decay, initial_accumulator_value, eps);
+}
+// [[Rcpp::export]]
+void rcpp_ignite_adagrad_step (ignite::optim_adagrad opt) {
+   ignite_adagrad_step(opt.get());
+}
+// [[Rcpp::export]]
+void rcpp_ignite_adagrad_zero_grad (ignite::optim_adagrad opt) {
+   ignite_adagrad_zero_grad(opt.get());
+}
+// [[Rcpp::export]]
+ignite::optim_rmsprop rcpp_ignite_rmsprop (torch::TensorList params, double lr, double alpha, double eps, double weight_decay, double momentum, bool centered) {
+  return  ignite_rmsprop(params.get(), lr, alpha, eps, weight_decay, momentum, centered);
+}
+// [[Rcpp::export]]
+void rcpp_ignite_rmsprop_step (ignite::optim_rmsprop opt) {
+   ignite_rmsprop_step(opt.get());
+}
+// [[Rcpp::export]]
+void rcpp_ignite_rmsprop_zero_grad (ignite::optim_rmsprop opt) {
+   ignite_rmsprop_zero_grad(opt.get());
+}
+// [[Rcpp::export]]
+torch::TensorList rcpp_ignite_opt_step (Rcpp::XPtr<XPtrTorchScriptModule> network, Rcpp::XPtr<XPtrTorchScriptModule> loss_fn, XPtrTorchStack input, torch::Tensor target, ignite::optim_sgd optimizer) {
+  return  ignite_opt_step(network.get(), loss_fn.get(), input.get(), target.get(), optimizer.get());
+}
+// [[Rcpp::export]]
+torch::Tensor rcpp_ignite_predict_step (Rcpp::XPtr<XPtrTorchScriptModule> network, XPtrTorchStack input) {
+  return  ignite_predict_step(network.get(), input.get());
 }
 // [[Rcpp::export]]
 void rcpp_delete_optim_sgd (void* x) {
    delete_optim_sgd(x);
 }
 // [[Rcpp::export]]
-void rcpp_delete_graph_function (void* x) {
-   delete_graph_function(x);
+void rcpp_delete_optim_adam (void* x) {
+   delete_optim_adam(x);
 }
 // [[Rcpp::export]]
-void rcpp_delete_script_module2 (void* x) {
-   delete_script_module2(x);
+void rcpp_delete_optim_adamw (void* x) {
+   delete_optim_adamw(x);
 }
 // [[Rcpp::export]]
-void rcpp_delete_stack2 (void* x) {
-   delete_stack2(x);
+void rcpp_delete_optim_adagrad (void* x) {
+   delete_optim_adagrad(x);
+}
+// [[Rcpp::export]]
+void rcpp_delete_optim_rmsprop (void* x) {
+   delete_optim_rmsprop(x);
 }
