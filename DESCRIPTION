@@ -10,15 +10,12 @@ Description: Efficient implementation of building blocks for training torch netw
     in C++. The only requirement for the network architecture is that it is jit-compiled,
     either via tracing or by defining it in 'TorchScript'.
 License: MIT + file LICENSE
-Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
 SystemRequirements: C++11
 RoxygenNote: 7.3.2
 Imports:
     Rcpp,
     R6,
     rlang,
-    roxytypes,
     torch
 Suggests:
     testthat (>= 3.0.0)
@@ -28,7 +25,5 @@ LinkingTo:
 Config/testthat/edition: 3
 NeedsCompilation: yes
 ByteCompile: yes
-Encoding: UTF-8
 Roxygen: list(markdown = TRUE, r6 = TRUE)
-NeedsCompilation: yes
 Encoding: UTF-8

@@ -45,7 +45,7 @@ Igniter = R6::R6Class(
     #'
     #' Note that you need to ensure that the network is in `"train"`-mode beforehand.
     #'
-    #' @typed  input: `list(torch_tensor)`
+    #' @param  input `list(torch_tensor)`
     #'  Inputs to the network.
     #'
     #' @return A `list()` containing the loss value and network output as `torch_tensor` objects
