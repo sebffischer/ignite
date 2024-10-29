@@ -6,3 +6,11 @@ assert_script_module <- function(x, arg_name = deparse1(substitute(x))) {
   }
   invisible(x)
 }
+
+priv = function(x) {
+  if (!inherits(x, "R6")) {
+    return(NULL)
+  }
+
+  x[[".__enclos_env__"]][["private"]]
+}

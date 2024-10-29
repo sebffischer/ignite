@@ -5,8 +5,6 @@
 \title{Igniter}
 \description{
 An R6 class that performs optimization steps and predictions with a given network, loss function, target and optimizer.
-
-\strong{Important}: No input checks are performed in the prediction and optimization step.
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -32,20 +30,20 @@ An R6 class that performs optimization steps and predictions with a given networ
 \if{html}{\out{<a id="method-Igniter-train"></a>}}
 \if{latex}{\out{\hypertarget{method-Igniter-train}{}}}
 \subsection{Method \code{train()}}{
+Set the network to training mode.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Igniter$train()}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{
 The object itself, invisibly
-Set the network to evaluation mode
-Sets the network to evaluation mode, e.g. dropout is inactive etc.
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Igniter-eval"></a>}}
 \if{latex}{\out{\hypertarget{method-Igniter-eval}{}}}
 \subsection{Method \code{eval()}}{
+Set the network to evaluation mode
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Igniter$eval()}\if{html}{\out{</div>}}
 }

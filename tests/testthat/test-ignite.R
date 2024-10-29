@@ -1,26 +1,27 @@
-test_that("multiplication works", {
-  library(torch)
+test_that("Igniter", {
   library(ignite)
+  library(torch)
   n = nn_linear(1, 1)
   input = torch_randn(1)
   target = torch_randn(1)
 
   nf = jit_trace(nn_linear(1, 1), input)
+  nf$to(device = "mps")
   loss_fn = jit_trace(nn_mse_loss(), input, input)
 
-  o = ignite:::rcpp_ignite_sgd(nf$parameters, lr = 0.01, momentum = 0, dampening = 0, weight_decay = 0, nesterov = FALSE)
+  opt = optim_ignite_adam(nf$parameters)
 
-  nf$parameters[[1]]
-
-  result = ignite:::rcpp_ignite_opt_step(
-    # this is the correct external pointer
-    network = mlr3misc::get_private(attr(nf, "module"))$ptr,
-    loss_fn = mlr3misc::get_private(attr(loss_fn, "module"))$ptr,
-    input   = list(input),
-    target  = target,
-    optimizer = o
+  igniter = Igniter$new(
+    network = nf,
+    loss_fn = loss_fn,
+    target = target,
+    optimizer = opt
   )
-  print(loss)
+
+  igniter$opt_step(
+    list(torch_randn(10, 1)$to(device = "mps"))
+  )
+
 
   nf$parameters[[1]]
 })
