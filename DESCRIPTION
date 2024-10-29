@@ -1,0 +1,22 @@
+Package: ignite
+Title: Training Torch Networks
+Version: 0.0.0.9000
+Authors@R: c(
+    person("Sebastian", "Fischer", email = "sebf.fischer@gmail.com", role = c("aut", "cre"))
+    )
+Description: Efficient implementation of building blocks for training torch networks in R.
+    This includes optimizers from LibTorch and an implementation of the train-predict logic
+    in C++. The only requirement for the network architecture is that it is jit-compiled,
+    either via tracing or by defining it in 'TorchScript'.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+SystemRequirements: C++11
+RoxygenNote: 7.1.1
+LinkingTo: 
+    Rcpp, torch
+Imports: 
+    Rcpp, torch
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
