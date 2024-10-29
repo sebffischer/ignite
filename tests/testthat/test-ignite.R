@@ -1,22 +1,25 @@
 test_that("multiplication works", {
-  batch_size = 16
-  input_features = 32
-  state_size = 128
+  n = nn_linear(1, 1)
+  input = torch_randn(1)
+  target = torch_randn(1)
 
-  X = torch::torch_randn(batch_size, input_features)
-  h = torch::torch_randn(batch_size, state_size)
-  C = torch::torch_randn(batch_size, state_size)
+  nf = jit_trace(nn_linear(1, 1), input)
+  loss_fn = jit_trace(nnf_mse_loss, input, input)
 
-  rnn = nn_ignite(input_features, state_size)
+  o = ignite:::rcpp_ignite_sgd(nf$parameters, lr = 0.01, momentum = 0, dampening = 0, weight_decay = 0, nesterov = FALSE)
 
+  nf$parameters[[1]]
 
+  loss = ignite:::rcpp_ignite_run_script_module(
+    # this is the correct external pointer
+    network = mlr3misc::get_private(attr(nf, "module"))$ptr,
+    loss_fn = loss_fn$ptr,
+    input   = input,
+    target  = target,
+    optimizer = o
+  )
 
-  out = rnn(X, list(h, C))
-  l <- out[[1]]$sum() + out[[2]]$sum()
-  l$backward()
-
-  expect_equal(rnn$weights$grad$shape, c(384, 160))
-  expect_equal(rnn$bias$grad$shape, c(384))
+  nf$parameters[[1]]
 })
 
 test_that("raise exceptions", {
