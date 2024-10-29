@@ -2,7 +2,8 @@ Package: ignite
 Title: Training Torch Networks
 Version: 0.0.0.9000
 Authors@R: c(
-    person("Sebastian", "Fischer", email = "sebf.fischer@gmail.com", role = c("aut", "cre"))
+    person("Sebastian", "Fischer", email = "sebf.fischer@gmail.com", role = c("aut", "cre")),
+    person("Daniel", "Falbel", email = "daniel@rstudio.com", role = c("aut"))
     )
 Description: Efficient implementation of building blocks for training torch networks in R.
     This includes optimizers from LibTorch and an implementation of the train-predict logic
@@ -12,11 +13,22 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 SystemRequirements: C++11
-RoxygenNote: 7.1.1
-LinkingTo: 
-    Rcpp, torch
-Imports: 
-    Rcpp, torch
-Suggests: 
+RoxygenNote: 7.3.2
+Imports:
+    Rcpp,
+    R6,
+    rlang,
+    roxytypes,
+    torch
+Suggests:
     testthat (>= 3.0.0)
+LinkingTo:
+    Rcpp,
+    torch
 Config/testthat/edition: 3
+NeedsCompilation: yes
+ByteCompile: yes
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE, r6 = TRUE)
+NeedsCompilation: yes
+Encoding: UTF-8

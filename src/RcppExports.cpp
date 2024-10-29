@@ -47,52 +47,177 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
-// rcpp_ignite_run_script_module
-torch::Tensor rcpp_ignite_run_script_module(Rcpp::XPtr<XPtrTorchScriptModule> network, Rcpp::XPtr<XPtrTorchFunctionPtr> loss_fn, torch::Tensor input, torch::Tensor target, ignite::optim_sgd optimizer);
-RcppExport SEXP _ignite_rcpp_ignite_run_script_module(SEXP networkSEXP, SEXP loss_fnSEXP, SEXP inputSEXP, SEXP targetSEXP, SEXP optimizerSEXP) {
+// rcpp_ignite_adam
+ignite::optim_adam rcpp_ignite_adam(torch::TensorList params, double lr, double beta1, double beta2, double eps, double weight_decay, bool amsgrad);
+RcppExport SEXP _ignite_rcpp_ignite_adam(SEXP paramsSEXP, SEXP lrSEXP, SEXP beta1SEXP, SEXP beta2SEXP, SEXP epsSEXP, SEXP weight_decaySEXP, SEXP amsgradSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< torch::TensorList >::type params(paramsSEXP);
+    Rcpp::traits::input_parameter< double >::type lr(lrSEXP);
+    Rcpp::traits::input_parameter< double >::type beta1(beta1SEXP);
+    Rcpp::traits::input_parameter< double >::type beta2(beta2SEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    Rcpp::traits::input_parameter< double >::type weight_decay(weight_decaySEXP);
+    Rcpp::traits::input_parameter< bool >::type amsgrad(amsgradSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_ignite_adam(params, lr, beta1, beta2, eps, weight_decay, amsgrad));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_ignite_adam_step
+void rcpp_ignite_adam_step(ignite::optim_adam opt);
+RcppExport SEXP _ignite_rcpp_ignite_adam_step(SEXP optSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< ignite::optim_adam >::type opt(optSEXP);
+    rcpp_ignite_adam_step(opt);
+    return R_NilValue;
+END_RCPP
+}
+// rcpp_ignite_adam_zero_grad
+void rcpp_ignite_adam_zero_grad(ignite::optim_adam opt);
+RcppExport SEXP _ignite_rcpp_ignite_adam_zero_grad(SEXP optSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< ignite::optim_adam >::type opt(optSEXP);
+    rcpp_ignite_adam_zero_grad(opt);
+    return R_NilValue;
+END_RCPP
+}
+// rcpp_ignite_adamw
+ignite::optim_adamw rcpp_ignite_adamw(torch::TensorList params, double lr, double beta1, double beta2, double eps, double weight_decay, bool amsgrad);
+RcppExport SEXP _ignite_rcpp_ignite_adamw(SEXP paramsSEXP, SEXP lrSEXP, SEXP beta1SEXP, SEXP beta2SEXP, SEXP epsSEXP, SEXP weight_decaySEXP, SEXP amsgradSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< torch::TensorList >::type params(paramsSEXP);
+    Rcpp::traits::input_parameter< double >::type lr(lrSEXP);
+    Rcpp::traits::input_parameter< double >::type beta1(beta1SEXP);
+    Rcpp::traits::input_parameter< double >::type beta2(beta2SEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    Rcpp::traits::input_parameter< double >::type weight_decay(weight_decaySEXP);
+    Rcpp::traits::input_parameter< bool >::type amsgrad(amsgradSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_ignite_adamw(params, lr, beta1, beta2, eps, weight_decay, amsgrad));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_ignite_adamw_step
+void rcpp_ignite_adamw_step(ignite::optim_adamw opt);
+RcppExport SEXP _ignite_rcpp_ignite_adamw_step(SEXP optSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< ignite::optim_adamw >::type opt(optSEXP);
+    rcpp_ignite_adamw_step(opt);
+    return R_NilValue;
+END_RCPP
+}
+// rcpp_ignite_adamw_zero_grad
+void rcpp_ignite_adamw_zero_grad(ignite::optim_adamw opt);
+RcppExport SEXP _ignite_rcpp_ignite_adamw_zero_grad(SEXP optSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< ignite::optim_adamw >::type opt(optSEXP);
+    rcpp_ignite_adamw_zero_grad(opt);
+    return R_NilValue;
+END_RCPP
+}
+// rcpp_ignite_adagrad
+ignite::optim_adagrad rcpp_ignite_adagrad(torch::TensorList params, double lr, double lr_decay, double weight_decay, double initial_accumulator_value, double eps);
+RcppExport SEXP _ignite_rcpp_ignite_adagrad(SEXP paramsSEXP, SEXP lrSEXP, SEXP lr_decaySEXP, SEXP weight_decaySEXP, SEXP initial_accumulator_valueSEXP, SEXP epsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< torch::TensorList >::type params(paramsSEXP);
+    Rcpp::traits::input_parameter< double >::type lr(lrSEXP);
+    Rcpp::traits::input_parameter< double >::type lr_decay(lr_decaySEXP);
+    Rcpp::traits::input_parameter< double >::type weight_decay(weight_decaySEXP);
+    Rcpp::traits::input_parameter< double >::type initial_accumulator_value(initial_accumulator_valueSEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_ignite_adagrad(params, lr, lr_decay, weight_decay, initial_accumulator_value, eps));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_ignite_adagrad_step
+void rcpp_ignite_adagrad_step(ignite::optim_adagrad opt);
+RcppExport SEXP _ignite_rcpp_ignite_adagrad_step(SEXP optSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< ignite::optim_adagrad >::type opt(optSEXP);
+    rcpp_ignite_adagrad_step(opt);
+    return R_NilValue;
+END_RCPP
+}
+// rcpp_ignite_adagrad_zero_grad
+void rcpp_ignite_adagrad_zero_grad(ignite::optim_adagrad opt);
+RcppExport SEXP _ignite_rcpp_ignite_adagrad_zero_grad(SEXP optSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< ignite::optim_adagrad >::type opt(optSEXP);
+    rcpp_ignite_adagrad_zero_grad(opt);
+    return R_NilValue;
+END_RCPP
+}
+// rcpp_ignite_rmsprop
+ignite::optim_rmsprop rcpp_ignite_rmsprop(torch::TensorList params, double lr, double alpha, double eps, double weight_decay, double momentum, bool centered);
+RcppExport SEXP _ignite_rcpp_ignite_rmsprop(SEXP paramsSEXP, SEXP lrSEXP, SEXP alphaSEXP, SEXP epsSEXP, SEXP weight_decaySEXP, SEXP momentumSEXP, SEXP centeredSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< torch::TensorList >::type params(paramsSEXP);
+    Rcpp::traits::input_parameter< double >::type lr(lrSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    Rcpp::traits::input_parameter< double >::type weight_decay(weight_decaySEXP);
+    Rcpp::traits::input_parameter< double >::type momentum(momentumSEXP);
+    Rcpp::traits::input_parameter< bool >::type centered(centeredSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_ignite_rmsprop(params, lr, alpha, eps, weight_decay, momentum, centered));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_ignite_rmsprop_step
+void rcpp_ignite_rmsprop_step(ignite::optim_rmsprop opt);
+RcppExport SEXP _ignite_rcpp_ignite_rmsprop_step(SEXP optSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< ignite::optim_rmsprop >::type opt(optSEXP);
+    rcpp_ignite_rmsprop_step(opt);
+    return R_NilValue;
+END_RCPP
+}
+// rcpp_ignite_rmsprop_zero_grad
+void rcpp_ignite_rmsprop_zero_grad(ignite::optim_rmsprop opt);
+RcppExport SEXP _ignite_rcpp_ignite_rmsprop_zero_grad(SEXP optSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< ignite::optim_rmsprop >::type opt(optSEXP);
+    rcpp_ignite_rmsprop_zero_grad(opt);
+    return R_NilValue;
+END_RCPP
+}
+// rcpp_ignite_opt_step
+torch::TensorList rcpp_ignite_opt_step(Rcpp::XPtr<XPtrTorchScriptModule> network, Rcpp::XPtr<XPtrTorchScriptModule> loss_fn, XPtrTorchStack input, torch::Tensor target, ignite::optim_sgd optimizer);
+RcppExport SEXP _ignite_rcpp_ignite_opt_step(SEXP networkSEXP, SEXP loss_fnSEXP, SEXP inputSEXP, SEXP targetSEXP, SEXP optimizerSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::XPtr<XPtrTorchScriptModule> >::type network(networkSEXP);
-    Rcpp::traits::input_parameter< Rcpp::XPtr<XPtrTorchFunctionPtr> >::type loss_fn(loss_fnSEXP);
-    Rcpp::traits::input_parameter< torch::Tensor >::type input(inputSEXP);
+    Rcpp::traits::input_parameter< Rcpp::XPtr<XPtrTorchScriptModule> >::type loss_fn(loss_fnSEXP);
+    Rcpp::traits::input_parameter< XPtrTorchStack >::type input(inputSEXP);
     Rcpp::traits::input_parameter< torch::Tensor >::type target(targetSEXP);
     Rcpp::traits::input_parameter< ignite::optim_sgd >::type optimizer(optimizerSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_ignite_run_script_module(network, loss_fn, input, target, optimizer));
+    rcpp_result_gen = Rcpp::wrap(rcpp_ignite_opt_step(network, loss_fn, input, target, optimizer));
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpp_ignite_forward
-torch::TensorList rcpp_ignite_forward(torch::Tensor input, torch::Tensor weights, torch::Tensor bias, torch::Tensor old_h, torch::Tensor old_cell);
-RcppExport SEXP _ignite_rcpp_ignite_forward(SEXP inputSEXP, SEXP weightsSEXP, SEXP biasSEXP, SEXP old_hSEXP, SEXP old_cellSEXP) {
+// rcpp_ignite_predict_step
+torch::Tensor rcpp_ignite_predict_step(Rcpp::XPtr<XPtrTorchScriptModule> network, XPtrTorchStack input);
+RcppExport SEXP _ignite_rcpp_ignite_predict_step(SEXP networkSEXP, SEXP inputSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< torch::Tensor >::type input(inputSEXP);
-    Rcpp::traits::input_parameter< torch::Tensor >::type weights(weightsSEXP);
-    Rcpp::traits::input_parameter< torch::Tensor >::type bias(biasSEXP);
-    Rcpp::traits::input_parameter< torch::Tensor >::type old_h(old_hSEXP);
-    Rcpp::traits::input_parameter< torch::Tensor >::type old_cell(old_cellSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_ignite_forward(input, weights, bias, old_h, old_cell));
-    return rcpp_result_gen;
-END_RCPP
-}
-// rcpp_ignite_backward
-torch::TensorList rcpp_ignite_backward(torch::Tensor grad_h, torch::Tensor grad_cell, torch::Tensor new_cell, torch::Tensor input_gate, torch::Tensor output_gate, torch::Tensor candidate_cell, torch::Tensor X, torch::Tensor gate_weights, torch::Tensor weights);
-RcppExport SEXP _ignite_rcpp_ignite_backward(SEXP grad_hSEXP, SEXP grad_cellSEXP, SEXP new_cellSEXP, SEXP input_gateSEXP, SEXP output_gateSEXP, SEXP candidate_cellSEXP, SEXP XSEXP, SEXP gate_weightsSEXP, SEXP weightsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< torch::Tensor >::type grad_h(grad_hSEXP);
-    Rcpp::traits::input_parameter< torch::Tensor >::type grad_cell(grad_cellSEXP);
-    Rcpp::traits::input_parameter< torch::Tensor >::type new_cell(new_cellSEXP);
-    Rcpp::traits::input_parameter< torch::Tensor >::type input_gate(input_gateSEXP);
-    Rcpp::traits::input_parameter< torch::Tensor >::type output_gate(output_gateSEXP);
-    Rcpp::traits::input_parameter< torch::Tensor >::type candidate_cell(candidate_cellSEXP);
-    Rcpp::traits::input_parameter< torch::Tensor >::type X(XSEXP);
-    Rcpp::traits::input_parameter< torch::Tensor >::type gate_weights(gate_weightsSEXP);
-    Rcpp::traits::input_parameter< torch::Tensor >::type weights(weightsSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_ignite_backward(grad_h, grad_cell, new_cell, input_gate, output_gate, candidate_cell, X, gate_weights, weights));
+    Rcpp::traits::input_parameter< Rcpp::XPtr<XPtrTorchScriptModule> >::type network(networkSEXP);
+    Rcpp::traits::input_parameter< XPtrTorchStack >::type input(inputSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_ignite_predict_step(network, input));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -106,33 +231,43 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
-// rcpp_delete_graph_function
-void rcpp_delete_graph_function(void* x);
-RcppExport SEXP _ignite_rcpp_delete_graph_function(SEXP xSEXP) {
+// rcpp_delete_optim_adam
+void rcpp_delete_optim_adam(void* x);
+RcppExport SEXP _ignite_rcpp_delete_optim_adam(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< void* >::type x(xSEXP);
-    rcpp_delete_graph_function(x);
+    rcpp_delete_optim_adam(x);
     return R_NilValue;
 END_RCPP
 }
-// rcpp_delete_script_module2
-void rcpp_delete_script_module2(void* x);
-RcppExport SEXP _ignite_rcpp_delete_script_module2(SEXP xSEXP) {
+// rcpp_delete_optim_adamw
+void rcpp_delete_optim_adamw(void* x);
+RcppExport SEXP _ignite_rcpp_delete_optim_adamw(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< void* >::type x(xSEXP);
-    rcpp_delete_script_module2(x);
+    rcpp_delete_optim_adamw(x);
     return R_NilValue;
 END_RCPP
 }
-// rcpp_delete_stack2
-void rcpp_delete_stack2(void* x);
-RcppExport SEXP _ignite_rcpp_delete_stack2(SEXP xSEXP) {
+// rcpp_delete_optim_adagrad
+void rcpp_delete_optim_adagrad(void* x);
+RcppExport SEXP _ignite_rcpp_delete_optim_adagrad(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< void* >::type x(xSEXP);
-    rcpp_delete_stack2(x);
+    rcpp_delete_optim_adagrad(x);
+    return R_NilValue;
+END_RCPP
+}
+// rcpp_delete_optim_rmsprop
+void rcpp_delete_optim_rmsprop(void* x);
+RcppExport SEXP _ignite_rcpp_delete_optim_rmsprop(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< void* >::type x(xSEXP);
+    rcpp_delete_optim_rmsprop(x);
     return R_NilValue;
 END_RCPP
 }
@@ -150,13 +285,25 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ignite_rcpp_ignite_sgd", (DL_FUNC) &_ignite_rcpp_ignite_sgd, 6},
     {"_ignite_rcpp_ignite_sgd_step", (DL_FUNC) &_ignite_rcpp_ignite_sgd_step, 1},
     {"_ignite_rcpp_ignite_sgd_zero_grad", (DL_FUNC) &_ignite_rcpp_ignite_sgd_zero_grad, 1},
-    {"_ignite_rcpp_ignite_run_script_module", (DL_FUNC) &_ignite_rcpp_ignite_run_script_module, 5},
-    {"_ignite_rcpp_ignite_forward", (DL_FUNC) &_ignite_rcpp_ignite_forward, 5},
-    {"_ignite_rcpp_ignite_backward", (DL_FUNC) &_ignite_rcpp_ignite_backward, 9},
+    {"_ignite_rcpp_ignite_adam", (DL_FUNC) &_ignite_rcpp_ignite_adam, 7},
+    {"_ignite_rcpp_ignite_adam_step", (DL_FUNC) &_ignite_rcpp_ignite_adam_step, 1},
+    {"_ignite_rcpp_ignite_adam_zero_grad", (DL_FUNC) &_ignite_rcpp_ignite_adam_zero_grad, 1},
+    {"_ignite_rcpp_ignite_adamw", (DL_FUNC) &_ignite_rcpp_ignite_adamw, 7},
+    {"_ignite_rcpp_ignite_adamw_step", (DL_FUNC) &_ignite_rcpp_ignite_adamw_step, 1},
+    {"_ignite_rcpp_ignite_adamw_zero_grad", (DL_FUNC) &_ignite_rcpp_ignite_adamw_zero_grad, 1},
+    {"_ignite_rcpp_ignite_adagrad", (DL_FUNC) &_ignite_rcpp_ignite_adagrad, 6},
+    {"_ignite_rcpp_ignite_adagrad_step", (DL_FUNC) &_ignite_rcpp_ignite_adagrad_step, 1},
+    {"_ignite_rcpp_ignite_adagrad_zero_grad", (DL_FUNC) &_ignite_rcpp_ignite_adagrad_zero_grad, 1},
+    {"_ignite_rcpp_ignite_rmsprop", (DL_FUNC) &_ignite_rcpp_ignite_rmsprop, 7},
+    {"_ignite_rcpp_ignite_rmsprop_step", (DL_FUNC) &_ignite_rcpp_ignite_rmsprop_step, 1},
+    {"_ignite_rcpp_ignite_rmsprop_zero_grad", (DL_FUNC) &_ignite_rcpp_ignite_rmsprop_zero_grad, 1},
+    {"_ignite_rcpp_ignite_opt_step", (DL_FUNC) &_ignite_rcpp_ignite_opt_step, 5},
+    {"_ignite_rcpp_ignite_predict_step", (DL_FUNC) &_ignite_rcpp_ignite_predict_step, 2},
     {"_ignite_rcpp_delete_optim_sgd", (DL_FUNC) &_ignite_rcpp_delete_optim_sgd, 1},
-    {"_ignite_rcpp_delete_graph_function", (DL_FUNC) &_ignite_rcpp_delete_graph_function, 1},
-    {"_ignite_rcpp_delete_script_module2", (DL_FUNC) &_ignite_rcpp_delete_script_module2, 1},
-    {"_ignite_rcpp_delete_stack2", (DL_FUNC) &_ignite_rcpp_delete_stack2, 1},
+    {"_ignite_rcpp_delete_optim_adam", (DL_FUNC) &_ignite_rcpp_delete_optim_adam, 1},
+    {"_ignite_rcpp_delete_optim_adamw", (DL_FUNC) &_ignite_rcpp_delete_optim_adamw, 1},
+    {"_ignite_rcpp_delete_optim_adagrad", (DL_FUNC) &_ignite_rcpp_delete_optim_adagrad, 1},
+    {"_ignite_rcpp_delete_optim_rmsprop", (DL_FUNC) &_ignite_rcpp_delete_optim_rmsprop, 1},
     {"_ignite_ignite_raise_exception", (DL_FUNC) &_ignite_ignite_raise_exception, 0},
     {NULL, NULL, 0}
 };

@@ -13,6 +13,46 @@ public:
   void* get ();
 };
 
+class optim_adam {
+public:
+  std::shared_ptr<void> ptr;
+  optim_adam (void* x);
+  optim_adam (std::shared_ptr<void> x) : ptr(x) {}
+  optim_adam (SEXP x);
+  operator SEXP () const;
+  void* get ();
+};
+
+class optim_adamw {
+public:
+  std::shared_ptr<void> ptr;
+  optim_adamw (void* x);
+  optim_adamw (std::shared_ptr<void> x) : ptr(x) {}
+  optim_adamw (SEXP x);
+  operator SEXP () const;
+  void* get ();
+};
+
+class optim_adagrad {
+public:
+  std::shared_ptr<void> ptr;
+  optim_adagrad (void* x);
+  optim_adagrad (std::shared_ptr<void> x) : ptr(x) {}
+  optim_adagrad (SEXP x);
+  operator SEXP () const;
+  void* get ();
+};
+
+class optim_rmsprop {
+public:
+  std::shared_ptr<void> ptr;
+  optim_rmsprop (void* x);
+  optim_rmsprop (std::shared_ptr<void> x) : ptr(x) {}
+  optim_rmsprop (SEXP x);
+  operator SEXP () const;
+  void* get ();
+};
+
 class stack {
 public:
   std::shared_ptr<void> ptr;
