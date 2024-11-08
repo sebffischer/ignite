@@ -2,6 +2,13 @@
 #include "ignite_types.h"
 #include "exports.h"
 
+
+Rcpp::XPtr<torch::Tensor> get_tensor_ptr(void* tensor) {
+    auto xptr = make_xptr<torch::Tensor>(tensor);
+    xptr.attr("class") = Rcpp::CharacterVector::create("torch_tensor", "R7");
+    return xptr;
+}
+
 namespace ignite {
 
 void* optim_sgd::get() {
@@ -100,6 +107,47 @@ adamw_param_groups::adamw_param_groups(SEXP x) {
 
 adamw_param_groups::adamw_param_groups (void* x) : ptr(x, rcpp_delete_adamw_param_groups) {};
 
+
+void* adamw_states::get() {
+  return ptr.get();
+}
+
+adamw_states::operator SEXP () const {
+  auto inner_ptr = std::static_pointer_cast<std::vector<adamw_state_inner>>(ptr);
+
+
+  Rcpp::List lst = Rcpp::List::create();
+  for (const auto& state : *inner_ptr) {
+    Rcpp::List param_lst = Rcpp::List::create();
+    // cast the params to a std::vector<void*>
+    for (const auto& param : state.params) {
+      param_lst.push_back(get_tensor_ptr(param));
+    }
+    // TODO: params
+    Rcpp::List group_lst = Rcpp::List::create(
+      Rcpp::Named("params") = param_lst,
+      Rcpp::Named("exp_avg") = get_tensor_ptr(state.exp_avg),
+      Rcpp::Named("exp_avg_sq") = get_tensor_ptr(state.exp_avg_sq),
+      Rcpp::Named("max_exp_avg_sq") = get_tensor_ptr(state.max_exp_avg_sq),
+      Rcpp::Named("step") = state.step);
+    lst.push_back(group_lst);
+  }
+  return lst;
+}
+
+adamw_states::adamw_states(SEXP x) {
+  std::vector<adamw_state_inner> states;
+  Rcpp::List list(x);
+  for (size_t i = 0; i < list.size(); ++i) {
+    Rcpp::List state = Rcpp::as<Rcpp::List>(list[i]);
+    adamw_state_inner inner_state(state);
+    states.push_back(inner_state);
+  }
+  ptr = std::make_shared<std::vector<adamw_state_inner>>(states);
+}
+
+adamw_states::adamw_states (void* x) : ptr(x, rcpp_delete_adamw_states) {};
+
 // adam
 
 void* optim_adam::get() {
@@ -159,5 +207,16 @@ optim_rmsprop::operator SEXP () const {
 }
 optim_rmsprop::optim_rmsprop (SEXP x) : optim_rmsprop{Rcpp::as<Rcpp::XPtr<optim_rmsprop>>(x)->ptr} {}
 optim_rmsprop::optim_rmsprop (void* x) : ptr(x, rcpp_delete_optim_rmsprop) {};
+
+void* optim_adamw::get() {
+  return ptr.get();
+}
+optim_adamw::operator SEXP () const {
+  auto xptr = make_xptr<optim_adamw>(*this);
+  xptr.attr("class") = Rcpp::CharacterVector::create("optim_ignite_adamw");
+  return xptr;
+}
+optim_adamw::optim_adamw (SEXP x) : optim_adamw{Rcpp::as<Rcpp::XPtr<optim_adamw>>(x)->ptr} {}
+optim_adamw::optim_adamw (void* x) : ptr(x, rcpp_delete_optim_adamw) {};
 }
 

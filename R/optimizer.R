@@ -57,9 +57,9 @@ optim_ignite_sgd <- optimizer_ignite(
     },
     param_groups = function(rhs) {
       if (!missing(rhs)) {
-        rcpp_ignite_set_param_groups(self$get_ptr(), rhs)
+        rcpp_ignite_sgd_set_param_groups(self$get_ptr(), rhs)
       }
-      rcpp_ignite_get_param_groups(self$get_ptr())
+      rcpp_ignite_sgd_get_param_groups(self$get_ptr())
     }
   )
 )
@@ -71,7 +71,8 @@ optim_ignite_adam <- optimizer_ignite(
   "optim_ignite_adam",
   initialize = function(params, lr = 1e-3, beta1 = 0.9, beta2 = 0.999, eps = 1e-8,
     weight_decay = 0, amsgrad = FALSE) {
-    self$ptr <- rcpp_ignite_adam(params, lr, beta1, beta2, eps, weight_decay, amsgrad)
+
+    self$ptr <- rcpp_ignite_adam(params, list(lr = lr, beta1 = beta1, beta2 = beta2, eps = eps, weight_decay = weight_decay, amsgrad = amsgrad))
   },
   get_ptr = function() {
     self$ptr
@@ -90,19 +91,36 @@ optim_ignite_adam <- optimizer_ignite(
 #' @export
 optim_ignite_adamw <- optimizer_ignite(
   "optim_ignite_adamw",
-  initialize = function(params, lr = 1e-3, beta1 = 0.9, beta2 = 0.999, eps = 1e-8,
+  initialize = function(params, lr = 1e-3, betas = c(0.9, 0.999), eps = 1e-8,
                        weight_decay = 1e-2, amsgrad = FALSE) {
-    self$ptr <- rcpp_ignite_adamw(params, lr, beta1, beta2, eps, weight_decay, amsgrad)
+    # TODO: amsgrad is missing in C++
+    self$ptr <- rcpp_ignite_adamw(list(list(params = params, lr = lr, betas = betas, eps = eps, weight_decay = weight_decay)))
+
   },
   get_ptr = function() {
     self$ptr
+  },
+  state_dict2 = function() {
+    rcpp_ignite_adamw_state(self$ptr)
+    # TODO:
+  },
+  load_state_dict = function(state_dict) {
+    # TODO:
   },
   step = function() {
     rcpp_ignite_adamw_step(self$ptr)
   },
   zero_grad = function() {
     rcpp_ignite_adamw_zero_grad(self$ptr)
-  }
+  },
+  active = list(
+    param_groups = function(rhs) {
+      if (!missing(rhs)) {
+        rcpp_ignite_sgd_set_param_groups(self$get_ptr(), rhs)
+      }
+      rcpp_ignite_adamw_get_param_groups(self$get_ptr())
+    }
+  )
 )
 
 #' @export

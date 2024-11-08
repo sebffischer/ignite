@@ -15,6 +15,9 @@ using torch_stack = torch::jit::Stack*;
 
 using optim_adamw_state = torch::optim::AdamWParamState*;
 
+
+
+
 struct sgd_param_group {
     std::vector<torch::Tensor*> params;
     double lr;
@@ -110,6 +113,22 @@ struct adamw_param_group {
 
 using adamw_param_groups = std::vector<adamw_param_group>;
 
+struct adamw_state {
+    torch::Tensor exp_avg;
+    torch::Tensor exp_avg_sq;
+    torch::Tensor max_exp_avg_sq;
+    int64_t step;
+
+    adamw_state(torch::optim::AdamWParamState& state) {
+        exp_avg = state.exp_avg();
+        exp_avg_sq = state.exp_avg_sq();
+        max_exp_avg_sq = state.max_exp_avg_sq();
+        step = state.step();
+    }
+};
+
+using adamw_states = std::vector<adamw_state>;
+
 // casting to and from raw pointers
 namespace make_raw {
     void* SGD(const optim_sgd& x);
@@ -125,6 +144,7 @@ namespace make_raw {
     void* SGDParamGroup(const sgd_param_group& x);
     void* AdamWParamGroups(const adamw_param_groups& x);
     void* AdamWParamGroup(const adamw_param_group& x);
+    void* AdamWStates(const adamw_states& x);
 }
 
 namespace from_raw {
@@ -141,4 +161,5 @@ namespace from_raw {
     sgd_param_group SGDParamGroup(void* x);
     adamw_param_groups AdamWParamGroups(void* x);
     adamw_param_group AdamWParamGroup(void* x);
+    adamw_states AdamWStates(void* x);
 }

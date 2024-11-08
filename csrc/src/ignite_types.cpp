@@ -43,6 +43,9 @@ void* AdamWParamGroup(const adamw_param_group& x) {
 void* AdamWParamGroups(const adamw_param_groups& x) {
     return make_ptr<adamw_param_groups>(x);
 }
+void* AdamWStates(const adamw_states& x) {
+    return make_ptr<adamw_states>(x);
+}
 }
 
 namespace from_raw {
@@ -84,6 +87,9 @@ adamw_param_group AdamWParamGroup(void* x) {
 }
 adamw_param_groups AdamWParamGroups(void* x) {
     return *reinterpret_cast<adamw_param_groups*>(x);
+}
+adamw_states AdamWStates(void* x) {
+    return *reinterpret_cast<adamw_states*>(x);
 }
 }
 
@@ -130,4 +136,9 @@ void delete_adamw_param_groups(void* x) {
 // [[torch::export]]
 void delete_adamw_param_group(void* x) {
   delete reinterpret_cast<adamw_param_group*>(x);
+}
+
+// [[torch::export]]
+void delete_adamw_states(void* x) {
+  delete reinterpret_cast<adamw_states*>(x);
 }

@@ -42,6 +42,13 @@ IGNITE_API void _ignite_adamw_set_param_groups (void* opt, void* param_groups) {
   } IGNITE_HANDLE_EXCEPTION
   
 }
+adamw_states ignite_adamw_state (optim_adamw opt);
+IGNITE_API void* _ignite_adamw_state (void* opt) {
+  try {
+    return  make_raw::AdamWStates(ignite_adamw_state(from_raw::AdamW(opt)));
+  } IGNITE_HANDLE_EXCEPTION
+  return (void*) NULL;
+}
 std::vector<torch::Tensor> ignite_opt_step (script_module network, script_module loss_fn, torch_stack input, torch::Tensor target, optim_sgd optimizer);
 IGNITE_API void* _ignite_opt_step (void* network, void* loss_fn, void* input, void* target, void* optimizer) {
   try {
@@ -235,6 +242,13 @@ void delete_adamw_param_group (void* x);
 IGNITE_API void _delete_adamw_param_group (void* x) {
   try {
      (delete_adamw_param_group(x));
+  } IGNITE_HANDLE_EXCEPTION
+  
+}
+void delete_adamw_states (void* x);
+IGNITE_API void _delete_adamw_states (void* x) {
+  try {
+     (delete_adamw_states(x));
   } IGNITE_HANDLE_EXCEPTION
   
 }

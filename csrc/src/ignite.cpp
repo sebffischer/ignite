@@ -9,7 +9,6 @@
 #include <vector>
 #include "ignite/ignite.h"
 #include "ignite/ignite_types.h"
-#include <utility>
 
 #include <torch/script.h>  // One-stop header.
 
@@ -60,27 +59,40 @@ void ignite_adamw_set_param_groups(optim_adamw opt, adamw_param_groups param_gro
   }
 }
 
+// [[torch::export(register_types=c("adamw_states", "AdamWStates", "void*", "ignite::adamw_states"))]]
+adamw_states ignite_adamw_state(optim_adamw opt) {
+  // each parameter has a state
+  // the thing that is returned by opt->state() is a ska::flat_map<void*, OptimizerParamState>
+  // These are the addresses of the torch::Tensor* I think.
+  // At least opt$state$map has the keys that correspond to print.default(net$parameters[[1]])
+  // We need to re-create this for load_state_dict()
 
-//// [[torch::export]]
-//optim_adamw_state ignite_adamw_state(optim_adamw opt) {
-//  // each parameter has a state
-//  // the thing that is returned by opt->state() is a ska::flat_map<void*, OptimizerParamState>
-//  // These are the addresses of the torch::Tensor* I think.
-//  // At least opt$state$map has the keys that correspond to print.default(net$parameters[[1]])
-//  // We need to re-create this for load_state_dict()
-//
-//
-//
-//
-//  auto state = opt->state();
-//  // iterate over the values of the ska::flat_map
-//  for (auto& pair : state) {
-//    auto& adamw_state = *static_cast<torch::optim::AdamWParamState*>(pair.second.get());
-//
-//    adamw_state.exp_avg_sq;
-//  }
-//  return;
-//}
+
+  adamw_states states;
+
+  // map over the ska::flat_map<void*, std::unique_ptr<torch::optim::AdamWParamState>>
+  for (const auto& [key, value] : opt->state()) {
+    // Use key and value
+    std::cout << "Key: " << key << ", Value: " << value.get() << std::endl;
+  }
+
+  //auto& state_map = opt->state();
+  //// iterate over the values of the ska::flat_map
+  //for (auto& [key, value] : *state_map) {
+  //    // Use key and value
+  //    std::cout << "Key: " << key << ", Value: " << value.get() << std::endl;
+  //    // Here, value is a unique_ptr<OptimizerParamState>, so use value.get() to get the raw pointer
+  //}
+  //for (const auto& pair : state_map) {
+  //  // Since pair.second is a unique_ptr, we need to access it without transferring ownership
+  //  const auto* adamw_param_state = static_cast<const torch::optim::AdamWParamState*>(pair.second.get());
+  //  if (adamw_param_state) {
+  //      // Create a copy of the state since we can't take ownership of the unique_ptr
+  //      adamw_state state_instance(*adamw_param_state);
+  //      states.push_back(state_instance);
+  //  }
+  return states;
+}
 
 
 
