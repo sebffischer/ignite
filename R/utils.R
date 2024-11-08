@@ -7,6 +7,13 @@ assert_script_module <- function(x, arg_name = deparse1(substitute(x))) {
   invisible(x)
 }
 
+assert_optim_ignite <- function(x, arg_name = deparse1(substitute(x))) {
+  if (!inherits(x, "optim_ignite")) {
+    rlang::abort(sprintf("`%s` must be a LibTorch optimizer (optim_ignite)", arg_name))
+  }
+  invisible(x)
+}
+
 priv = function(x) {
   if (!inherits(x, "R6")) {
     return(NULL)

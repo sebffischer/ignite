@@ -4,6 +4,22 @@
 #include <ignite/ignite.h>
 
 // [[Rcpp::export]]
+ignite::sgd_param_groups rcpp_ignite_sgd_get_param_groups (ignite::optim_sgd opt) {
+  return  ignite_sgd_get_param_groups(opt.get());
+}
+// [[Rcpp::export]]
+void rcpp_ignite_sgd_set_param_groups (ignite::optim_sgd opt, ignite::sgd_param_groups param_groups) {
+   ignite_sgd_set_param_groups(opt.get(), param_groups.get());
+}
+// [[Rcpp::export]]
+torch::TensorList rcpp_ignite_opt_step (Rcpp::XPtr<XPtrTorchScriptModule> network, Rcpp::XPtr<XPtrTorchScriptModule> loss_fn, XPtrTorchStack input, torch::Tensor target, ignite::optim_sgd optimizer) {
+  return  ignite_opt_step(network.get(), loss_fn.get(), input.get(), target.get(), optimizer.get());
+}
+// [[Rcpp::export]]
+torch::Tensor rcpp_ignite_predict_step (Rcpp::XPtr<XPtrTorchScriptModule> network, XPtrTorchStack input) {
+  return  ignite_predict_step(network.get(), input.get());
+}
+// [[Rcpp::export]]
 ignite::optim_sgd rcpp_ignite_sgd (torch::TensorList params, double lr, double momentum, double dampening, double weight_decay, bool nesterov) {
   return  ignite_sgd(params.get(), lr, momentum, dampening, weight_decay, nesterov);
 }
@@ -64,14 +80,6 @@ void rcpp_ignite_rmsprop_zero_grad (ignite::optim_rmsprop opt) {
    ignite_rmsprop_zero_grad(opt.get());
 }
 // [[Rcpp::export]]
-torch::TensorList rcpp_ignite_opt_step (Rcpp::XPtr<XPtrTorchScriptModule> network, Rcpp::XPtr<XPtrTorchScriptModule> loss_fn, XPtrTorchStack input, torch::Tensor target, ignite::optim_sgd optimizer) {
-  return  ignite_opt_step(network.get(), loss_fn.get(), input.get(), target.get(), optimizer.get());
-}
-// [[Rcpp::export]]
-torch::Tensor rcpp_ignite_predict_step (Rcpp::XPtr<XPtrTorchScriptModule> network, XPtrTorchStack input) {
-  return  ignite_predict_step(network.get(), input.get());
-}
-// [[Rcpp::export]]
 void rcpp_delete_optim_sgd (void* x) {
    delete_optim_sgd(x);
 }
@@ -90,4 +98,20 @@ void rcpp_delete_optim_adagrad (void* x) {
 // [[Rcpp::export]]
 void rcpp_delete_optim_rmsprop (void* x) {
    delete_optim_rmsprop(x);
+}
+// [[Rcpp::export]]
+void rcpp_delete_optim_param_groups (void* x) {
+   delete_optim_param_groups(x);
+}
+// [[Rcpp::export]]
+void rcpp_delete_optim_param_group (void* x) {
+   delete_optim_param_group(x);
+}
+// [[Rcpp::export]]
+void rcpp_delete_sgd_param_groups (void* x) {
+   delete_sgd_param_groups(x);
+}
+// [[Rcpp::export]]
+void rcpp_delete_sgd_param_group (void* x) {
+   delete_sgd_param_group(x);
 }

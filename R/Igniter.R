@@ -4,14 +4,26 @@
 #' @export
 Igniter = R6::R6Class("Igniter",
   public = list(
+    #' @field network (`torch_script_module`)\cr
+    #' The network to use.
     network = NULL,
+    #' @field loss_fn (`torch_script_module`)\cr
+    #' The loss function to use.
     loss_fn = NULL,
-    input = NULL,
-    target = NULL,
+    #' @field optimizer `torch_optimizer`
+    #' The optimizer to use.
     optimizer = NULL,
+    #' @description
+    #' Creates a new instance of this [R6][R6::R6Class] class.
+    #' @param network (`torch_script_module`)\cr
+    #'   The jitted network.
+    #' @param loss_fn (`torch_script_module`)\cr
+    #'   The jitted loss function.
+    #''
     initialize = function(network, loss_fn, optimizer) {
       assert_script_module(network)
       assert_script_module(loss_fn)
+      assert_optim_ignite(optimizer)
       self$optimizer = optimizer$ptr
       self$network = priv(attr(network, "module"))$ptr
       self$loss_fn = priv(attr(loss_fn, "module"))$ptr

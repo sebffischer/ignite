@@ -25,6 +25,18 @@ void* ScriptModule(const script_module& x) {
 void* TorchStack(const torch_stack& x) {
     return make_ptr<torch_stack>(x);
 }
+void* OptimParamGroups(const optim_param_groups& x) {
+    return make_ptr<optim_param_groups>(x);
+}
+void* OptimParamGroup(const optim_param_group& x) {
+    return make_ptr<optim_param_group>(x);
+}
+void* SGDParamGroup(const sgd_param_group& x) {
+    return make_ptr<sgd_param_group>(x);
+}
+void* SGDParamGroups(const sgd_param_groups& x) {
+    return make_ptr<sgd_param_groups>(x);
+}
 }
 
 namespace from_raw {
@@ -49,6 +61,18 @@ script_module ScriptModule(void* x) {
 torch_stack TorchStack(void* x) {
     return reinterpret_cast<torch_stack>(x);
 }
+optim_param_groups OptimParamGroups(void* x) {
+    return *reinterpret_cast<optim_param_groups*>(x);
+}
+optim_param_group OptimParamGroup(void* x) {
+    return *reinterpret_cast<optim_param_group*>(x);
+}
+sgd_param_groups SGDParamGroups(void* x) {
+    return *reinterpret_cast<sgd_param_groups*>(x);
+}
+sgd_param_group SGDParamGroup(void* x) {
+    return *reinterpret_cast<sgd_param_group*>(x);
+}
 }
 
 // [[torch::export]]
@@ -70,4 +94,20 @@ void delete_optim_adagrad(void* x) {
 // [[torch::export]]
 void delete_optim_rmsprop(void* x) {
   delete reinterpret_cast<optim_rmsprop>(x);
+}
+// [[torch::export]]
+void delete_optim_param_groups(void* x) {
+  delete reinterpret_cast<optim_param_groups*>(x);
+}
+// [[torch::export]]
+void delete_optim_param_group(void* x) {
+  delete reinterpret_cast<optim_param_group*>(x);
+}
+// [[torch::export]]
+void delete_sgd_param_groups(void* x) {
+  delete reinterpret_cast<sgd_param_groups*>(x);
+}
+// [[torch::export]]
+void delete_sgd_param_group(void* x) {
+  delete reinterpret_cast<sgd_param_group*>(x);
 }

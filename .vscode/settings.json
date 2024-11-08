@@ -1,3 +1,10 @@
 {
-    "cmake.sourceDirectory": "/Users/sebi/gh/ignite/csrc"
+    "cmake.sourceDirectory": "/Users/sebi/gh/ignite/csrc",
+    "files.associations": {
+        "*.Rmd": "rmd",
+        "*.rmd": "rmd",
+        "vector": "cpp",
+        "locale": "cpp",
+        "algorithm": "cpp"
+    }
 }

@@ -6,6 +6,20 @@
 \description{
 An R6 class that performs optimization steps and predictions with a given network, loss function, target and optimizer.
 }
+\section{Public fields}{
+\if{html}{\out{<div class="r6-fields">}}
+\describe{
+\item{\code{network}}{(\code{torch_script_module})\cr
+The network to use.}
+
+\item{\code{loss_fn}}{(\code{torch_script_module})\cr
+The loss function to use.}
+
+\item{\code{optimizer}}{\code{torch_optimizer}
+The optimizer to use.}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
@@ -21,10 +35,23 @@ An R6 class that performs optimization steps and predictions with a given networ
 \if{html}{\out{<a id="method-Igniter-new"></a>}}
 \if{latex}{\out{\hypertarget{method-Igniter-new}{}}}
 \subsection{Method \code{new()}}{
+Creates a new instance of this \link[R6:R6Class]{R6} class.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Igniter$new(network, loss_fn, target, optimizer)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Igniter$new(network, loss_fn, optimizer)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{network}}{(\code{torch_script_module})\cr
+The jitted network.}
+
+\item{\code{loss_fn}}{(\code{torch_script_module})\cr
+The jitted loss function.
+'}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Igniter-train"></a>}}
@@ -64,7 +91,7 @@ Note that you need to ensure that the network is in \code{"train"}-mode beforeha
 \if{latex}{\out{\hypertarget{method-Igniter-opt_step}{}}}
 \subsection{Method \code{opt_step()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Igniter$opt_step(input)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Igniter$opt_step(input, target)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -72,6 +99,9 @@ Note that you need to ensure that the network is in \code{"train"}-mode beforeha
 \describe{
 \item{\code{input}}{\code{list(torch_tensor)}
 Inputs to the network.}
+
+\item{\code{target}}{\code{torch_tensor}
+Targets for the loss function.}
 }
 \if{html}{\out{</div>}}
 }

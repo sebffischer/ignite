@@ -12,6 +12,87 @@
 
 #include <torch/script.h>  // One-stop header.
 
+// types and functions used by all optimizers
+
+// [[torch::export(register_types=c("sgd_param_groups", "SGDParamGroups", "void*", "ignite::sgd_param_groups"))]]
+sgd_param_groups ignite_sgd_get_param_groups(optim_sgd opt) {
+  // iterate over the param groups and call ignite_sgd_get_param_group for each one and push the results into a vector
+  sgd_param_groups param_groups;
+  for (torch::optim::OptimizerParamGroup& group : opt->param_groups()) {
+    param_groups.push_back(sgd_param_group(group));
+  }
+  return param_groups;
+}
+
+// [[torch::export]]
+void ignite_sgd_set_param_groups(optim_sgd opt, sgd_param_groups param_groups) {
+  if (opt->param_groups().size() != param_groups.size()) {
+    throw std::runtime_error("Parameter groups have different lengths");
+  }
+
+  // zip the param_groups and opt->param_groups by iterating over the indices
+  for (size_t i = 0; i < opt->param_groups().size(); ++i) {
+    auto& opt_group = opt->param_groups()[i];
+    auto& param_group = param_groups[i];
+    // TODO check that the params all point to the same tensors
+    opt_group.set_options(std::make_unique<torch::optim::SGDOptions>(param_group.to_sgd_options()));
+  }
+}
+
+
+//// [[torch::export]]
+//optim_adamw_state ignite_adamw_state(optim_adamw opt) {
+//  // each parameter has a state
+//  // the thing that is returned by opt->state() is a ska::flat_map<void*, OptimizerParamState>
+//  // These are the addresses of the torch::Tensor* I think.
+//  // At least opt$state$map has the keys that correspond to print.default(net$parameters[[1]])
+//  // We need to re-create this for load_state_dict()
+//
+//
+//
+//
+//  auto state = opt->state();
+//  // iterate over the values of the ska::flat_map
+//  for (auto& pair : state) {
+//    auto& adamw_state = *static_cast<torch::optim::AdamWParamState*>(pair.second.get());
+//
+//    adamw_state.exp_avg_sq;
+//  }
+//  return;
+//}
+
+
+
+
+// [[torch::export(register_types=list(c("script_module", "ScriptModule", "void*", "Rcpp::XPtr<XPtrTorchScriptModule>"), c("torch_stack", "TorchStack", "void*", "XPtrTorchStack")))]]
+std::vector<torch::Tensor> ignite_opt_step(script_module network, script_module loss_fn, torch_stack input, torch::Tensor target, optim_sgd optimizer) {
+  optimizer->zero_grad();
+
+  auto out = (*network)(*input);
+  auto loss_inputs = new torch::jit::Stack();
+  loss_inputs->push_back(out);
+  loss_inputs->push_back(target);
+
+  auto loss = (*loss_fn)(*loss_inputs);
+  loss.toTensor().backward();
+  optimizer->step();
+
+  std::vector<torch::Tensor> result;
+  result.push_back(loss.toTensor());
+  result.push_back(out.toTensor());
+  return result;
+}
+
+// [[torch::export]]
+torch::Tensor ignite_predict_step(script_module network, torch_stack input) {
+  torch::NoGradGuard no_grad;
+  auto out = (*network)(*input);
+  return out.toTensor();
+}
+
+
+// implementations of optimizers
+
 // [[torch::export(register_types=c("optim_sgd", "SGD", "void*", "ignite::optim_sgd"))]]
 optim_sgd ignite_sgd(torch::TensorList params, double lr, double momentum, double dampening,
                         double weight_decay, bool nesterov) {
@@ -21,7 +102,10 @@ optim_sgd ignite_sgd(torch::TensorList params, double lr, double momentum, doubl
     .dampening(dampening)
     .weight_decay(weight_decay)
     .nesterov(nesterov);
- return new torch::optim::SGD(params.vec(), options);
+
+  auto o = new torch::optim::SGD(params.vec(), options);
+
+  return o;
 }
 
 // [[torch::export]]
@@ -33,6 +117,17 @@ void ignite_sgd_step(optim_sgd opt) {
 void ignite_sgd_zero_grad(optim_sgd opt) {
   opt->zero_grad();
 }
+
+//// [[torch::export]]
+//double ignite_sgd_get_momentum(optim_param_group group) {
+//  auto& sgd_options = static_cast<torch::optim::SGDOptions&>(group.options());
+//  return sgd_options.momentum();
+//}
+//
+//// [[torch::export]]
+//double ignite_sgd_set_momentum(optim_param_group group, double momentum) {
+//}
+
 
 // [[torch::export(register_types=c("optim_adam", "Adam", "void*", "ignite::optim_adam"))]]
 optim_adam ignite_adam(torch::TensorList params, double lr, double beta1, double beta2,
@@ -119,32 +214,6 @@ void ignite_rmsprop_zero_grad(optim_rmsprop opt) {
   opt->zero_grad();
 }
 
-// [[torch::export(register_types=list(c("script_module", "ScriptModule", "void*", "Rcpp::XPtr<XPtrTorchScriptModule>"), c("torch_stack", "TorchStack", "void*", "XPtrTorchStack")))]]
-std::vector<torch::Tensor> ignite_opt_step(script_module network, script_module loss_fn, torch_stack input, torch::Tensor target, optim_sgd optimizer) {
-  optimizer->zero_grad();
-
-  auto out = (*network)(*input);
-  auto loss_inputs = new torch::jit::Stack();
-  loss_inputs->push_back(out);
-  loss_inputs->push_back(target);
-
-  auto loss = (*loss_fn)(*loss_inputs);
-  loss.toTensor().backward();
-  optimizer->step();
-
-  std::vector<torch::Tensor> result;
-  result.push_back(loss.toTensor());
-  result.push_back(out.toTensor());
-  return result;
-}
-
-// [[torch::export]]
-torch::Tensor ignite_predict_step(script_module network, torch_stack input) {
-  torch::NoGradGuard no_grad;
-  auto out = (*network)(*input);
-  return out.toTensor();
-}
-
 
 IGNITE_API int _raise_exception ()
 {
@@ -153,3 +222,4 @@ IGNITE_API int _raise_exception ()
   } IGNITE_HANDLE_EXCEPTION
   return 1;
 }
+

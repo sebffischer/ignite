@@ -6,7 +6,7 @@ test_that("Igniter", {
   target = torch_randn(1)
 
   nf = jit_trace(nn_linear(1, 1), input)
-  nf$to(device = "mps")
+  nf$to(device = "cpu")
   loss_fn = jit_trace(nn_mse_loss(), input, input)
 
   opt = optim_ignite_adam(nf$parameters)
@@ -14,12 +14,12 @@ test_that("Igniter", {
   igniter = Igniter$new(
     network = nf,
     loss_fn = loss_fn,
-    target = target,
     optimizer = opt
   )
 
   igniter$opt_step(
-    list(torch_randn(10, 1)$to(device = "mps"))
+    input = list(torch_randn(10, 1)$to(device = "cpu")),
+    target = torch_randn(10, 1)$to(device = "cpu")
   )
 
 

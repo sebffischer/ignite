@@ -14,6 +14,34 @@ IGNITE_API void ignite_last_error_clear()
   p_ignite_last_error = NULL;
 }
 
+sgd_param_groups ignite_sgd_get_param_groups (optim_sgd opt);
+IGNITE_API void* _ignite_sgd_get_param_groups (void* opt) {
+  try {
+    return  make_raw::SGDParamGroups(ignite_sgd_get_param_groups(from_raw::SGD(opt)));
+  } IGNITE_HANDLE_EXCEPTION
+  return (void*) NULL;
+}
+void ignite_sgd_set_param_groups (optim_sgd opt, sgd_param_groups param_groups);
+IGNITE_API void _ignite_sgd_set_param_groups (void* opt, void* param_groups) {
+  try {
+     (ignite_sgd_set_param_groups(from_raw::SGD(opt), from_raw::SGDParamGroups(param_groups)));
+  } IGNITE_HANDLE_EXCEPTION
+  
+}
+std::vector<torch::Tensor> ignite_opt_step (script_module network, script_module loss_fn, torch_stack input, torch::Tensor target, optim_sgd optimizer);
+IGNITE_API void* _ignite_opt_step (void* network, void* loss_fn, void* input, void* target, void* optimizer) {
+  try {
+    return  make_raw::TensorList(ignite_opt_step(from_raw::ScriptModule(network), from_raw::ScriptModule(loss_fn), from_raw::TorchStack(input), from_raw::Tensor(target), from_raw::SGD(optimizer)));
+  } IGNITE_HANDLE_EXCEPTION
+  return (void*) NULL;
+}
+torch::Tensor ignite_predict_step (script_module network, torch_stack input);
+IGNITE_API void* _ignite_predict_step (void* network, void* input) {
+  try {
+    return  make_raw::Tensor(ignite_predict_step(from_raw::ScriptModule(network), from_raw::TorchStack(input)));
+  } IGNITE_HANDLE_EXCEPTION
+  return (void*) NULL;
+}
 optim_sgd ignite_sgd (torch::TensorList params, double lr, double momentum, double dampening, double weight_decay, bool nesterov);
 IGNITE_API void* _ignite_sgd (void* params, double lr, double momentum, double dampening, double weight_decay, bool nesterov) {
   try {
@@ -119,20 +147,6 @@ IGNITE_API void _ignite_rmsprop_zero_grad (void* opt) {
   } IGNITE_HANDLE_EXCEPTION
   
 }
-std::vector<torch::Tensor> ignite_opt_step (script_module network, script_module loss_fn, torch_stack input, torch::Tensor target, optim_sgd optimizer);
-IGNITE_API void* _ignite_opt_step (void* network, void* loss_fn, void* input, void* target, void* optimizer) {
-  try {
-    return  make_raw::TensorList(ignite_opt_step(from_raw::ScriptModule(network), from_raw::ScriptModule(loss_fn), from_raw::TorchStack(input), from_raw::Tensor(target), from_raw::SGD(optimizer)));
-  } IGNITE_HANDLE_EXCEPTION
-  return (void*) NULL;
-}
-torch::Tensor ignite_predict_step (script_module network, torch_stack input);
-IGNITE_API void* _ignite_predict_step (void* network, void* input) {
-  try {
-    return  make_raw::Tensor(ignite_predict_step(from_raw::ScriptModule(network), from_raw::TorchStack(input)));
-  } IGNITE_HANDLE_EXCEPTION
-  return (void*) NULL;
-}
 void delete_optim_sgd (void* x);
 IGNITE_API void _delete_optim_sgd (void* x) {
   try {
@@ -165,6 +179,34 @@ void delete_optim_rmsprop (void* x);
 IGNITE_API void _delete_optim_rmsprop (void* x) {
   try {
      (delete_optim_rmsprop(x));
+  } IGNITE_HANDLE_EXCEPTION
+  
+}
+void delete_optim_param_groups (void* x);
+IGNITE_API void _delete_optim_param_groups (void* x) {
+  try {
+     (delete_optim_param_groups(x));
+  } IGNITE_HANDLE_EXCEPTION
+  
+}
+void delete_optim_param_group (void* x);
+IGNITE_API void _delete_optim_param_group (void* x) {
+  try {
+     (delete_optim_param_group(x));
+  } IGNITE_HANDLE_EXCEPTION
+  
+}
+void delete_sgd_param_groups (void* x);
+IGNITE_API void _delete_sgd_param_groups (void* x) {
+  try {
+     (delete_sgd_param_groups(x));
+  } IGNITE_HANDLE_EXCEPTION
+  
+}
+void delete_sgd_param_group (void* x);
+IGNITE_API void _delete_sgd_param_group (void* x) {
+  try {
+     (delete_sgd_param_group(x));
   } IGNITE_HANDLE_EXCEPTION
   
 }

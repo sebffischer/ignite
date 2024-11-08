@@ -27,6 +27,10 @@ extern void* p_ignite_last_error;
 IGNITE_API void* ignite_last_error ();
 IGNITE_API void ignite_last_error_clear();
 
+IGNITE_API void* _ignite_sgd_get_param_groups (void* opt);
+IGNITE_API void _ignite_sgd_set_param_groups (void* opt, void* param_groups);
+IGNITE_API void* _ignite_opt_step (void* network, void* loss_fn, void* input, void* target, void* optimizer);
+IGNITE_API void* _ignite_predict_step (void* network, void* input);
 IGNITE_API void* _ignite_sgd (void* params, double lr, double momentum, double dampening, double weight_decay, bool nesterov);
 IGNITE_API void _ignite_sgd_step (void* opt);
 IGNITE_API void _ignite_sgd_zero_grad (void* opt);
@@ -42,15 +46,37 @@ IGNITE_API void _ignite_adagrad_zero_grad (void* opt);
 IGNITE_API void* _ignite_rmsprop (void* params, double lr, double alpha, double eps, double weight_decay, double momentum, bool centered);
 IGNITE_API void _ignite_rmsprop_step (void* opt);
 IGNITE_API void _ignite_rmsprop_zero_grad (void* opt);
-IGNITE_API void* _ignite_opt_step (void* network, void* loss_fn, void* input, void* target, void* optimizer);
-IGNITE_API void* _ignite_predict_step (void* network, void* input);
 IGNITE_API void _delete_optim_sgd (void* x);
 IGNITE_API void _delete_optim_adam (void* x);
 IGNITE_API void _delete_optim_adamw (void* x);
 IGNITE_API void _delete_optim_adagrad (void* x);
 IGNITE_API void _delete_optim_rmsprop (void* x);
+IGNITE_API void _delete_optim_param_groups (void* x);
+IGNITE_API void _delete_optim_param_group (void* x);
+IGNITE_API void _delete_sgd_param_groups (void* x);
+IGNITE_API void _delete_sgd_param_group (void* x);
 
 #ifdef RCPP_VERSION
+inline void* ignite_sgd_get_param_groups (void* opt) {
+  auto ret =  _ignite_sgd_get_param_groups(opt);
+  host_exception_handler();
+  return ret;
+}
+inline void ignite_sgd_set_param_groups (void* opt, void* param_groups) {
+   _ignite_sgd_set_param_groups(opt, param_groups);
+  host_exception_handler();
+  
+}
+inline void* ignite_opt_step (void* network, void* loss_fn, void* input, void* target, void* optimizer) {
+  auto ret =  _ignite_opt_step(network, loss_fn, input, target, optimizer);
+  host_exception_handler();
+  return ret;
+}
+inline void* ignite_predict_step (void* network, void* input) {
+  auto ret =  _ignite_predict_step(network, input);
+  host_exception_handler();
+  return ret;
+}
 inline void* ignite_sgd (void* params, double lr, double momentum, double dampening, double weight_decay, bool nesterov) {
   auto ret =  _ignite_sgd(params, lr, momentum, dampening, weight_decay, nesterov);
   host_exception_handler();
@@ -126,16 +152,6 @@ inline void ignite_rmsprop_zero_grad (void* opt) {
   host_exception_handler();
   
 }
-inline void* ignite_opt_step (void* network, void* loss_fn, void* input, void* target, void* optimizer) {
-  auto ret =  _ignite_opt_step(network, loss_fn, input, target, optimizer);
-  host_exception_handler();
-  return ret;
-}
-inline void* ignite_predict_step (void* network, void* input) {
-  auto ret =  _ignite_predict_step(network, input);
-  host_exception_handler();
-  return ret;
-}
 inline void delete_optim_sgd (void* x) {
    _delete_optim_sgd(x);
   host_exception_handler();
@@ -158,6 +174,26 @@ inline void delete_optim_adagrad (void* x) {
 }
 inline void delete_optim_rmsprop (void* x) {
    _delete_optim_rmsprop(x);
+  host_exception_handler();
+  
+}
+inline void delete_optim_param_groups (void* x) {
+   _delete_optim_param_groups(x);
+  host_exception_handler();
+  
+}
+inline void delete_optim_param_group (void* x) {
+   _delete_optim_param_group(x);
+  host_exception_handler();
+  
+}
+inline void delete_sgd_param_groups (void* x) {
+   _delete_sgd_param_groups(x);
+  host_exception_handler();
+  
+}
+inline void delete_sgd_param_group (void* x) {
+   _delete_sgd_param_group(x);
   host_exception_handler();
   
 }
