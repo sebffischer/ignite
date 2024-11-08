@@ -37,6 +37,11 @@ void* SGDParamGroup(const sgd_param_group& x) {
 void* SGDParamGroups(const sgd_param_groups& x) {
     return make_ptr<sgd_param_groups>(x);
 }
+void* AdamWParamGroup(const adamw_param_group& x) {
+    return make_ptr<adamw_param_group>(x);
+}
+void* AdamWParamGroups(const adamw_param_groups& x) {
+    return make_ptr<adamw_param_groups>(x);
 }
 
 namespace from_raw {
@@ -72,6 +77,12 @@ sgd_param_groups SGDParamGroups(void* x) {
 }
 sgd_param_group SGDParamGroup(void* x) {
     return *reinterpret_cast<sgd_param_group*>(x);
+}
+adamw_param_group AdamWParamGroup(void* x) {
+    return *reinterpret_cast<adamw_param_group*>(x);
+}
+adamw_param_groups AdamWParamGroups(void* x) {
+    return *reinterpret_cast<adamw_param_groups*>(x);
 }
 }
 
@@ -110,4 +121,12 @@ void delete_sgd_param_groups(void* x) {
 // [[torch::export]]
 void delete_sgd_param_group(void* x) {
   delete reinterpret_cast<sgd_param_group*>(x);
+}
+// [[torch::export]]
+void delete_adamw_param_groups(void* x) {
+  delete reinterpret_cast<adamw_param_groups*>(x);
+}
+// [[torch::export]]
+void delete_adamw_param_group(void* x) {
+  delete reinterpret_cast<adamw_param_group*>(x);
 }

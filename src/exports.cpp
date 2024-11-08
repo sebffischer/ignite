@@ -12,6 +12,14 @@ void rcpp_ignite_sgd_set_param_groups (ignite::optim_sgd opt, ignite::sgd_param_
    ignite_sgd_set_param_groups(opt.get(), param_groups.get());
 }
 // [[Rcpp::export]]
+ignite::adamw_param_groups rcpp_ignite_adamw_get_param_groups (ignite::optim_adamw opt) {
+  return  ignite_adamw_get_param_groups(opt.get());
+}
+// [[Rcpp::export]]
+void rcpp_ignite_adamw_set_param_groups (ignite::optim_adamw opt, ignite::adamw_param_groups param_groups) {
+   ignite_adamw_set_param_groups(opt.get(), param_groups.get());
+}
+// [[Rcpp::export]]
 torch::TensorList rcpp_ignite_opt_step (Rcpp::XPtr<XPtrTorchScriptModule> network, Rcpp::XPtr<XPtrTorchScriptModule> loss_fn, XPtrTorchStack input, torch::Tensor target, ignite::optim_sgd optimizer) {
   return  ignite_opt_step(network.get(), loss_fn.get(), input.get(), target.get(), optimizer.get());
 }
@@ -114,4 +122,12 @@ void rcpp_delete_sgd_param_groups (void* x) {
 // [[Rcpp::export]]
 void rcpp_delete_sgd_param_group (void* x) {
    delete_sgd_param_group(x);
+}
+// [[Rcpp::export]]
+void rcpp_delete_adamw_param_groups (void* x) {
+   delete_adamw_param_groups(x);
+}
+// [[Rcpp::export]]
+void rcpp_delete_adamw_param_group (void* x) {
+   delete_adamw_param_group(x);
 }

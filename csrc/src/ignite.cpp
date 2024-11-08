@@ -12,8 +12,6 @@
 
 #include <torch/script.h>  // One-stop header.
 
-// types and functions used by all optimizers
-
 // [[torch::export(register_types=c("sgd_param_groups", "SGDParamGroups", "void*", "ignite::sgd_param_groups"))]]
 sgd_param_groups ignite_sgd_get_param_groups(optim_sgd opt) {
   // iterate over the param groups and call ignite_sgd_get_param_group for each one and push the results into a vector
@@ -36,6 +34,28 @@ void ignite_sgd_set_param_groups(optim_sgd opt, sgd_param_groups param_groups) {
     auto& param_group = param_groups[i];
     // TODO check that the params all point to the same tensors
     opt_group.set_options(std::make_unique<torch::optim::SGDOptions>(param_group.to_sgd_options()));
+  }
+}
+
+// [[torch::export(register_types=c("adamw_param_groups", "AdamWParamGroups", "void*", "ignite::adamw_param_groups"))]]
+adamw_param_groups ignite_adamw_get_param_groups(optim_adamw opt) {
+  adamw_param_groups param_groups;
+  for (torch::optim::OptimizerParamGroup& group : opt->param_groups()) {
+    param_groups.push_back(adamw_param_group(group));
+  }
+  return param_groups;
+}
+
+// [[torch::export]]
+void ignite_adamw_set_param_groups(optim_adamw opt, adamw_param_groups param_groups) {
+  if (opt->param_groups().size() != param_groups.size()) {
+    throw std::runtime_error("Parameter groups have different lengths");
+  }
+  // zip the param_groups and opt->param_groups by iterating over the indices
+  for (size_t i = 0; i < opt->param_groups().size(); ++i) {
+    auto& opt_group = opt->param_groups()[i];
+    auto& param_group = param_groups[i];
+    opt_group.set_options(std::make_unique<torch::optim::AdamWOptions>(param_group.to_adamw_options()));
   }
 }
 

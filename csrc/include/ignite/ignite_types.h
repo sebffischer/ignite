@@ -15,7 +15,7 @@ using torch_stack = torch::jit::Stack*;
 
 using optim_adamw_state = torch::optim::AdamWParamState*;
 
-struct adamw_param_group {
+struct sgd_param_group {
     std::vector<torch::Tensor*> params;
     double lr;
     double weight_decay;
@@ -60,6 +60,46 @@ struct adamw_param_group {
 
 using sgd_param_groups = std::vector<sgd_param_group>;
 
+struct adamw_param_group {
+    std::vector<torch::Tensor*> params;
+    double lr;
+    double weight_decay;
+    std::pair<double, double> betas;
+    double eps;
+
+    adamw_param_group(
+        std::vector<torch::Tensor*> params,
+        double learning_rate,
+        double weight_decay,
+        std::pair<double, double> betas,
+        double eps
+    )
+        : params(params), lr(learning_rate), weight_decay(weight_decay), betas(betas), eps(eps) {}
+
+    adamw_param_group(
+        torch::optim::OptimizerParamGroup& group
+    ) {
+        std::vector<torch::Tensor*> params;
+        for (torch::Tensor& param : group.params()) {
+            params.push_back(&param);
+        }
+        auto& options = static_cast<torch::optim::AdamWOptions&>(group.options());
+        lr = options.lr();
+        weight_decay = options.weight_decay();
+        betas = options.betas();
+        eps = options.eps();
+    }
+
+    torch::optim::AdamWOptions to_adamw_options() const {
+        auto options = torch::optim::AdamWOptions(lr);
+        options.weight_decay(weight_decay);
+        options.betas(betas);
+        options.eps(eps);
+        return options;
+    }
+};
+
+using adamw_param_groups = std::vector<adamw_param_group>;
 
 // casting to and from raw pointers
 namespace make_raw {
@@ -74,6 +114,8 @@ namespace make_raw {
     void* OptimParamGroup(const optim_param_group& x);
     void* SGDParamGroups(const sgd_param_groups& x);
     void* SGDParamGroup(const sgd_param_group& x);
+    void* AdamWParamGroups(const adamw_param_groups& x);
+    void* AdamWParamGroup(const adamw_param_group& x);
 }
 
 namespace from_raw {
@@ -88,4 +130,6 @@ namespace from_raw {
     optim_param_group OptimParamGroup(void* x);
     sgd_param_groups SGDParamGroups(void* x);
     sgd_param_group SGDParamGroup(void* x);
+    adamw_param_groups AdamWParamGroups(void* x);
+    adamw_param_group AdamWParamGroup(void* x);
 }

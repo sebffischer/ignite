@@ -5,6 +5,8 @@
 
 ignite::sgd_param_groups rcpp_ignite_sgd_get_param_groups (ignite::optim_sgd opt);
 void rcpp_ignite_sgd_set_param_groups (ignite::optim_sgd opt, ignite::sgd_param_groups param_groups);
+ignite::adamw_param_groups rcpp_ignite_adamw_get_param_groups (ignite::optim_adamw opt);
+void rcpp_ignite_adamw_set_param_groups (ignite::optim_adamw opt, ignite::adamw_param_groups param_groups);
 torch::TensorList rcpp_ignite_opt_step (Rcpp::XPtr<XPtrTorchScriptModule> network, Rcpp::XPtr<XPtrTorchScriptModule> loss_fn, XPtrTorchStack input, torch::Tensor target, ignite::optim_sgd optimizer);
 torch::Tensor rcpp_ignite_predict_step (Rcpp::XPtr<XPtrTorchScriptModule> network, XPtrTorchStack input);
 ignite::optim_sgd rcpp_ignite_sgd (torch::TensorList params, double lr, double momentum, double dampening, double weight_decay, bool nesterov);
@@ -31,3 +33,5 @@ void rcpp_delete_optim_param_groups (void* x);
 void rcpp_delete_optim_param_group (void* x);
 void rcpp_delete_sgd_param_groups (void* x);
 void rcpp_delete_sgd_param_group (void* x);
+void rcpp_delete_adamw_param_groups (void* x);
+void rcpp_delete_adamw_param_group (void* x);
