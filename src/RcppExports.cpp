@@ -156,19 +156,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // rcpp_ignite_adamw
-ignite::optim_adamw rcpp_ignite_adamw(torch::TensorList params, double lr, double beta1, double beta2, double eps, double weight_decay, bool amsgrad);
-RcppExport SEXP _ignite_rcpp_ignite_adamw(SEXP paramsSEXP, SEXP lrSEXP, SEXP beta1SEXP, SEXP beta2SEXP, SEXP epsSEXP, SEXP weight_decaySEXP, SEXP amsgradSEXP) {
+ignite::optim_adamw rcpp_ignite_adamw(ignite::adamw_param_groups groups);
+RcppExport SEXP _ignite_rcpp_ignite_adamw(SEXP groupsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< torch::TensorList >::type params(paramsSEXP);
-    Rcpp::traits::input_parameter< double >::type lr(lrSEXP);
-    Rcpp::traits::input_parameter< double >::type beta1(beta1SEXP);
-    Rcpp::traits::input_parameter< double >::type beta2(beta2SEXP);
-    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
-    Rcpp::traits::input_parameter< double >::type weight_decay(weight_decaySEXP);
-    Rcpp::traits::input_parameter< bool >::type amsgrad(amsgradSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_ignite_adamw(params, lr, beta1, beta2, eps, weight_decay, amsgrad));
+    Rcpp::traits::input_parameter< ignite::adamw_param_groups >::type groups(groupsSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_ignite_adamw(groups));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -398,7 +392,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ignite_rcpp_ignite_adam", (DL_FUNC) &_ignite_rcpp_ignite_adam, 7},
     {"_ignite_rcpp_ignite_adam_step", (DL_FUNC) &_ignite_rcpp_ignite_adam_step, 1},
     {"_ignite_rcpp_ignite_adam_zero_grad", (DL_FUNC) &_ignite_rcpp_ignite_adam_zero_grad, 1},
-    {"_ignite_rcpp_ignite_adamw", (DL_FUNC) &_ignite_rcpp_ignite_adamw, 7},
+    {"_ignite_rcpp_ignite_adamw", (DL_FUNC) &_ignite_rcpp_ignite_adamw, 1},
     {"_ignite_rcpp_ignite_adamw_step", (DL_FUNC) &_ignite_rcpp_ignite_adamw_step, 1},
     {"_ignite_rcpp_ignite_adamw_zero_grad", (DL_FUNC) &_ignite_rcpp_ignite_adamw_zero_grad, 1},
     {"_ignite_rcpp_ignite_adagrad", (DL_FUNC) &_ignite_rcpp_ignite_adagrad, 6},

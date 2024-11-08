@@ -49,8 +49,8 @@ rcpp_ignite_adam_zero_grad <- function(opt) {
     invisible(.Call('_ignite_rcpp_ignite_adam_zero_grad', PACKAGE = 'ignite', opt))
 }
 
-rcpp_ignite_adamw <- function(params, lr, beta1, beta2, eps, weight_decay, amsgrad) {
-    .Call('_ignite_rcpp_ignite_adamw', PACKAGE = 'ignite', params, lr, beta1, beta2, eps, weight_decay, amsgrad)
+rcpp_ignite_adamw <- function(groups) {
+    .Call('_ignite_rcpp_ignite_adamw', PACKAGE = 'ignite', groups)
 }
 
 rcpp_ignite_adamw_step <- function(opt) {

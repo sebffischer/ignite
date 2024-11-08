@@ -90,6 +90,15 @@ struct adamw_param_group {
         eps = options.eps();
     }
 
+    torch::optim::OptimizerParamGroup to_adamw_group_params() const {
+        std::vector<torch::Tensor> params_vec;
+        for (auto* param : params) {
+            params_vec.push_back(*param);
+        }
+        auto options = to_adamw_options();
+        return torch::optim::OptimizerParamGroup(params_vec, std::make_unique<torch::optim::AdamWOptions>(options));
+    }
+
     torch::optim::AdamWOptions to_adamw_options() const {
         auto options = torch::optim::AdamWOptions(lr);
         options.weight_decay(weight_decay);

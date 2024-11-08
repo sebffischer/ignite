@@ -98,10 +98,10 @@ IGNITE_API void _ignite_adam_zero_grad (void* opt) {
   } IGNITE_HANDLE_EXCEPTION
   
 }
-optim_adamw ignite_adamw (torch::TensorList params, double lr, double beta1, double beta2, double eps, double weight_decay, bool amsgrad);
-IGNITE_API void* _ignite_adamw (void* params, double lr, double beta1, double beta2, double eps, double weight_decay, bool amsgrad) {
+optim_adamw ignite_adamw (adamw_param_groups groups);
+IGNITE_API void* _ignite_adamw (void* groups) {
   try {
-    return  make_raw::AdamW(ignite_adamw(from_raw::TensorList(params), lr, beta1, beta2, eps, weight_decay, amsgrad));
+    return  make_raw::AdamW(ignite_adamw(from_raw::AdamWParamGroups(groups)));
   } IGNITE_HANDLE_EXCEPTION
   return (void*) NULL;
 }

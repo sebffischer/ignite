@@ -52,8 +52,8 @@ void rcpp_ignite_adam_zero_grad (ignite::optim_adam opt) {
    ignite_adam_zero_grad(opt.get());
 }
 // [[Rcpp::export]]
-ignite::optim_adamw rcpp_ignite_adamw (torch::TensorList params, double lr, double beta1, double beta2, double eps, double weight_decay, bool amsgrad) {
-  return  ignite_adamw(params.get(), lr, beta1, beta2, eps, weight_decay, amsgrad);
+ignite::optim_adamw rcpp_ignite_adamw (ignite::adamw_param_groups groups) {
+  return  ignite_adamw(groups.get());
 }
 // [[Rcpp::export]]
 void rcpp_ignite_adamw_step (ignite::optim_adamw opt) {

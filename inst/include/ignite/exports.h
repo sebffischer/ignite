@@ -39,7 +39,7 @@ IGNITE_API void _ignite_sgd_zero_grad (void* opt);
 IGNITE_API void* _ignite_adam (void* params, double lr, double beta1, double beta2, double eps, double weight_decay, bool amsgrad);
 IGNITE_API void _ignite_adam_step (void* opt);
 IGNITE_API void _ignite_adam_zero_grad (void* opt);
-IGNITE_API void* _ignite_adamw (void* params, double lr, double beta1, double beta2, double eps, double weight_decay, bool amsgrad);
+IGNITE_API void* _ignite_adamw (void* groups);
 IGNITE_API void _ignite_adamw_step (void* opt);
 IGNITE_API void _ignite_adamw_zero_grad (void* opt);
 IGNITE_API void* _ignite_adagrad (void* params, double lr, double lr_decay, double weight_decay, double initial_accumulator_value, double eps);
@@ -121,8 +121,8 @@ inline void ignite_adam_zero_grad (void* opt) {
   host_exception_handler();
   
 }
-inline void* ignite_adamw (void* params, double lr, double beta1, double beta2, double eps, double weight_decay, bool amsgrad) {
-  auto ret =  _ignite_adamw(params, lr, beta1, beta2, eps, weight_decay, amsgrad);
+inline void* ignite_adamw (void* groups) {
+  auto ret =  _ignite_adamw(groups);
   host_exception_handler();
   return ret;
 }

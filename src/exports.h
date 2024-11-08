@@ -15,7 +15,7 @@ void rcpp_ignite_sgd_zero_grad (ignite::optim_sgd opt);
 ignite::optim_adam rcpp_ignite_adam (torch::TensorList params, double lr, double beta1, double beta2, double eps, double weight_decay, bool amsgrad);
 void rcpp_ignite_adam_step (ignite::optim_adam opt);
 void rcpp_ignite_adam_zero_grad (ignite::optim_adam opt);
-ignite::optim_adamw rcpp_ignite_adamw (torch::TensorList params, double lr, double beta1, double beta2, double eps, double weight_decay, bool amsgrad);
+ignite::optim_adamw rcpp_ignite_adamw (ignite::adamw_param_groups groups);
 void rcpp_ignite_adamw_step (ignite::optim_adamw opt);
 void rcpp_ignite_adamw_zero_grad (ignite::optim_adamw opt);
 ignite::optim_adagrad rcpp_ignite_adagrad (torch::TensorList params, double lr, double lr_decay, double weight_decay, double initial_accumulator_value, double eps);

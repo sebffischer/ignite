@@ -9,6 +9,7 @@
 #include <vector>
 #include "ignite/ignite.h"
 #include "ignite/ignite_types.h"
+#include <utility>
 
 #include <torch/script.h>  // One-stop header.
 
@@ -171,14 +172,15 @@ void ignite_adam_zero_grad(optim_adam opt) {
 }
 
 // [[torch::export(register_types=c("optim_adamw", "AdamW", "void*", "ignite::optim_adamw"))]]
-optim_adamw ignite_adamw(torch::TensorList params, double lr, double beta1, double beta2,
-                        double eps, double weight_decay, bool amsgrad) {
-  auto options = torch::optim::AdamWOptions(lr)
-    .betas(std::make_tuple(beta1, beta2))
-    .eps(eps)
-    .weight_decay(weight_decay)
-    .amsgrad(amsgrad);
-  return new torch::optim::AdamW(params.vec(), options);
+optim_adamw ignite_adamw(adamw_param_groups groups) {
+
+  // iterate over the groups and convert each to a torch::optim::OptimizerParamGroup
+  std::vector<torch::optim::OptimizerParamGroup> param_groups;
+  for (const auto& group : groups) {
+    param_groups.push_back(group.to_adamw_group_params());
+  }
+
+  return new torch::optim::AdamW(param_groups);
 }
 
 // [[torch::export]]

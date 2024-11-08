@@ -1,5 +1,6 @@
 #pragma once
 #include <torch.h>
+#include <utility>
 
 namespace ignite {
 
