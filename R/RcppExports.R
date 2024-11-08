@@ -9,6 +9,14 @@ rcpp_ignite_sgd_set_param_groups <- function(opt, param_groups) {
     invisible(.Call('_ignite_rcpp_ignite_sgd_set_param_groups', PACKAGE = 'ignite', opt, param_groups))
 }
 
+rcpp_ignite_adamw_get_param_groups <- function(opt) {
+    .Call('_ignite_rcpp_ignite_adamw_get_param_groups', PACKAGE = 'ignite', opt)
+}
+
+rcpp_ignite_adamw_set_param_groups <- function(opt, param_groups) {
+    invisible(.Call('_ignite_rcpp_ignite_adamw_set_param_groups', PACKAGE = 'ignite', opt, param_groups))
+}
+
 rcpp_ignite_opt_step <- function(network, loss_fn, input, target, optimizer) {
     .Call('_ignite_rcpp_ignite_opt_step', PACKAGE = 'ignite', network, loss_fn, input, target, optimizer)
 }
@@ -111,6 +119,14 @@ rcpp_delete_sgd_param_groups <- function(x) {
 
 rcpp_delete_sgd_param_group <- function(x) {
     invisible(.Call('_ignite_rcpp_delete_sgd_param_group', PACKAGE = 'ignite', x))
+}
+
+rcpp_delete_adamw_param_groups <- function(x) {
+    invisible(.Call('_ignite_rcpp_delete_adamw_param_groups', PACKAGE = 'ignite', x))
+}
+
+rcpp_delete_adamw_param_group <- function(x) {
+    invisible(.Call('_ignite_rcpp_delete_adamw_param_group', PACKAGE = 'ignite', x))
 }
 
 ignite_raise_exception <- function() {

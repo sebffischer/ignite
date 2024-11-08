@@ -43,6 +43,7 @@ void* AdamWParamGroup(const adamw_param_group& x) {
 void* AdamWParamGroups(const adamw_param_groups& x) {
     return make_ptr<adamw_param_groups>(x);
 }
+}
 
 namespace from_raw {
 optim_sgd SGD(void* x) {
