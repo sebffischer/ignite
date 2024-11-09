@@ -189,10 +189,14 @@ optim_adamw ignite_adamw(adamw_param_groups groups) {
   // iterate over the groups and convert each to a torch::optim::OptimizerParamGroup
   std::vector<torch::optim::OptimizerParamGroup> param_groups;
   for (const auto& group : groups) {
+    std::cout << "group" << std::endl;
     param_groups.push_back(group.to_adamw_group_params());
   }
 
-  return new torch::optim::AdamW(param_groups);
+
+  auto x = new torch::optim::AdamW(param_groups);
+  std::cout << "adamw created" << std::endl;
+  return x;
 }
 
 // [[torch::export]]

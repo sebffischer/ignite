@@ -82,7 +82,6 @@ struct adamw_param_group {
     adamw_param_group(
         torch::optim::OptimizerParamGroup& group
     ) {
-        std::vector<torch::Tensor*> params;
         for (torch::Tensor& param : group.params()) {
             params.push_back(&param);
         }
@@ -95,9 +94,14 @@ struct adamw_param_group {
 
     torch::optim::OptimizerParamGroup to_adamw_group_params() const {
         std::vector<torch::Tensor> params_vec;
+        std::cout << "params length in ignite_adamw: " << params.size() << std::endl;
         for (auto* param : params) {
+            std::cout << "dimension of the tensor: " << param->dim() << std::endl;
+            std::cout << "Hello" << std::endl;
             params_vec.push_back(*param);
+            // print dimension of the tensor
         }
+        // print the
         auto options = to_adamw_options();
         return torch::optim::OptimizerParamGroup(params_vec, std::make_unique<torch::optim::AdamWOptions>(options));
     }

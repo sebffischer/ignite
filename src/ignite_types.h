@@ -108,14 +108,14 @@ public:
         Rcpp::Rcout << "sgd_param_group_inner constructor" << std::endl;
         Rcpp::List params_list = Rcpp::as<Rcpp::List>(list["params"]);
 
-        std::vector<void*> params;
-
         for (auto x : params_list) {
             // Assuming x is a pointer to a torch::Tensor, convert it back to void*
             // x was created with make_xptr<torch::Tensor>
             // cast to an Rcpp::XPtr<torch::Tensor> and then to a void*
             auto xptr = Rcpp::as<Rcpp::XPtr<torch::Tensor>>(x);
 
+          // xptr.get() returns a torch::Tensor* which is an XPtrTorchTensor
+          // to get it as a tensor we
             params.push_back(static_cast<void*>(xptr.get()));
         }
 
@@ -155,15 +155,11 @@ public:
         Rcpp::Rcout << "BBBBB" << std::endl;
         Rcpp::List params_list = Rcpp::as<Rcpp::List>(list["params"]);
 
-        std::vector<void*> params;
-
+        // Initialize the member params vector
         for (auto x : params_list) {
-            // Assuming x is a pointer to a torch::Tensor, convert it back to void*
-            // x was created with make_xptr<torch::Tensor>
-            // cast to an Rcpp::XPtr<torch::Tensor> and then to a void*
             auto xptr = Rcpp::as<Rcpp::XPtr<torch::Tensor>>(x);
-
-            params.push_back(static_cast<void*>(xptr.get()));
+            this->params.push_back(static_cast<void*>(xptr.get()->get()));
+            std::cout << "another one" << std::endl;
         }
 
         learning_rate = Rcpp::as<double>(list["lr"]);

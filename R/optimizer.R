@@ -39,10 +39,10 @@ optim_ignite_sgd <- optimizer_ignite(
     self$ptr
   },
   step = function() {
-    optim_sgd_step(self$ptr)
+    rcpp_ignite_sgd_step(self$ptr)
   },
   zero_grad = function() {
-    optim_sgd_zero_grad(self$ptr)
+    rcpp_ignite_sgd_zero_grad(self$ptr)
   },
   state_dict = function() {
     # TODO:

@@ -99,6 +99,9 @@ adamw_param_groups::adamw_param_groups(SEXP x) {
   Rcpp::List list(x);
   for (size_t i = 0; i < list.size(); ++i) {
     Rcpp::List group = Rcpp::as<Rcpp::List>(list[i]);
+    // convert group["params"] to an Rcpp::List
+    Rcpp::List params_list = Rcpp::as<Rcpp::List>(group["params"]);
+    Rcpp::Rcout << "groupAAAAAA:" << params_list.size() << std::endl;
     adamw_param_group_inner inner_group(group);
     param_groups.push_back(inner_group);
   }
