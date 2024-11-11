@@ -32,8 +32,6 @@ sgd_param_groups::operator SEXP () const {
   auto inner_ptr = std::static_pointer_cast<std::vector<sgd_param_group_inner>>(ptr);
   // iterate over the vector and create a list of lists containing the fields
 
-
-
   Rcpp::List lst = Rcpp::List::create();
   for (const auto& group : *inner_ptr) {
     Rcpp::List param_lst = Rcpp::List::create();
@@ -77,18 +75,32 @@ adamw_param_groups::operator SEXP () const {
   Rcpp::List lst = Rcpp::List::create();
   for (const auto& group : *inner_ptr) {
     Rcpp::List param_lst = Rcpp::List::create();
+    // BUG:
+    // HERE IS THE PROBLEM:
+    // When we don't convert the param (which is a void*) to a torch::Tensor here,
+    // there are no segfaults.
+
     for (const auto& param : group.params) {
       auto tensor = torch::Tensor(param);
       auto xptr = make_xptr<torch::Tensor>(tensor);
+      // print the address of the tensor
+      std::cout << "address of tensor: " << tensor.get() << std::endl;
       xptr.attr("class") = Rcpp::CharacterVector::create("torch_tensor", "R7");
       param_lst.push_back(xptr);
     }
+
+    // remove all elements from group.params
+    //group.params.clear();
+
+
     Rcpp::NumericVector betas = Rcpp::NumericVector::create(group.betas.first, group.betas.second);
-    Rcpp::List group_lst = Rcpp::List::create(Rcpp::Named("params") = param_lst,
+    Rcpp::List group_lst = Rcpp::List::create(
+      Rcpp::Named("params") = param_lst,
                                              Rcpp::Named("lr") = group.learning_rate,
                                              Rcpp::Named("weight_decay") = group.weight_decay,
                                              Rcpp::Named("betas") = betas,
-                                             Rcpp::Named("eps") = group.eps);
+                                             Rcpp::Named("eps") = group.eps,
+                                             Rcpp::Named("amsgrad") = group.amsgrad);
     lst.push_back(group_lst);
   }
   return lst;
@@ -99,9 +111,7 @@ adamw_param_groups::adamw_param_groups(SEXP x) {
   Rcpp::List list(x);
   for (size_t i = 0; i < list.size(); ++i) {
     Rcpp::List group = Rcpp::as<Rcpp::List>(list[i]);
-    // convert group["params"] to an Rcpp::List
     Rcpp::List params_list = Rcpp::as<Rcpp::List>(group["params"]);
-    Rcpp::Rcout << "groupAAAAAA:" << params_list.size() << std::endl;
     adamw_param_group_inner inner_group(group);
     param_groups.push_back(inner_group);
   }
@@ -118,17 +128,9 @@ void* adamw_states::get() {
 adamw_states::operator SEXP () const {
   auto inner_ptr = std::static_pointer_cast<std::vector<adamw_state_inner>>(ptr);
 
-
   Rcpp::List lst = Rcpp::List::create();
   for (const auto& state : *inner_ptr) {
-    Rcpp::List param_lst = Rcpp::List::create();
-    // cast the params to a std::vector<void*>
-    for (const auto& param : state.params) {
-      param_lst.push_back(get_tensor_ptr(param));
-    }
-    // TODO: params
     Rcpp::List group_lst = Rcpp::List::create(
-      Rcpp::Named("params") = param_lst,
       Rcpp::Named("exp_avg") = get_tensor_ptr(state.exp_avg),
       Rcpp::Named("exp_avg_sq") = get_tensor_ptr(state.exp_avg_sq),
       Rcpp::Named("max_exp_avg_sq") = get_tensor_ptr(state.max_exp_avg_sq),

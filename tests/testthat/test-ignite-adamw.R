@@ -3,18 +3,49 @@ make_adamw = function(...) {
 
   n$parameters[[1]]
 
-
   o = optim_ignite_adamw(n$parameters)
-  x = torch_randn(10, 1)
-  y = torch_randn(10, 1)
-  loss = mean((n(x) - y)^2)
-  loss$backward()
-  o$step()
+
+  s = function() {
+    x = torch_randn(10, 1)
+    y = torch_randn(10, 1)
+    loss = mean((n(x) - y)^2)
+    loss$backward()
+    o$step()
+    o$zero_grad()
+  }
+  s()
+  s()
   o
 }
 
 test_that("constructor arguments are passed to the optimizer", {
-  # TODO
+  library(torch)
+  library(ignite)
+  library(testthat)
+  n = nn_linear(1, 1)
+  lr = 0.123
+  weight_decay = 0.456
+  betas = c(0.789, 0.123)
+  eps = 0.01
+  amsgrad = sample(c(TRUE, FALSE), 1)
+  o = make_adamw(n$parameters, amsgrad = TRUE)
+  # When we bind the param_groups to a variable, then calling gc() will not segfault
+  # only when we again bind the param_groups to a variabe and call gc() will it segfault
+  #
+  # I think this means that the delter of the external pointer frees twice?
+
+  gs = o$param_groups
+  gs = o$param_groups
+  gc()
+  gc()
+  print.default(o$state_dict2()[[2]]$max_exp_avg_sq)
+  o$param_groups[[1]]
+
+  expect_equal(o$param_groups[[1]]$lr, lr)
+  expect_equal(o$param_groups[[1]]$weight_decay, weight_decay)
+  expect_equal(o$param_groups[[1]]$betas, betas)
+  expect_equal(o$param_groups[[1]]$eps, eps)
+  expect_equal(o$param_groups[[1]]$amsgrad, amsgrad)
 })
 
 test_that("param_groups works", {
@@ -22,7 +53,7 @@ test_that("param_groups works", {
   library(ignite)
   library(torch)
 
-  o = make_adamw(lr = 0.1)
+  o = make_adamw(lr = 0.1, amsgrad = TRUE)
   o$state_dict2()
   o$param_groups
 

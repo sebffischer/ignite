@@ -148,8 +148,9 @@ public:
     double weight_decay;
     std::pair<double, double> betas;
     double eps;
+    bool amsgrad;
 
-    adamw_param_group_inner(std::vector<void*> params, double learning_rate, double weight_decay, std::pair<double, double> betas, double eps) : params(params), learning_rate(learning_rate), weight_decay(weight_decay), betas(betas), eps(eps) {}
+    adamw_param_group_inner(std::vector<void*> params, double learning_rate, double weight_decay, std::pair<double, double> betas, double eps, bool amsgrad) : params(params), learning_rate(learning_rate), weight_decay(weight_decay), betas(betas), eps(eps), amsgrad(amsgrad) {}
     // Constructor from Rcpp::List
     adamw_param_group_inner(Rcpp::List list) {
         Rcpp::Rcout << "BBBBB" << std::endl;
@@ -169,6 +170,7 @@ public:
         Rcpp::NumericVector betas_vec = Rcpp::as<Rcpp::NumericVector>(list["betas"]);
         betas = std::make_pair(betas_vec[0], betas_vec[1]);
         eps = Rcpp::as<double>(list["eps"]);
+        amsgrad = Rcpp::as<bool>(list["amsgrad"]);
     }
   };
   std::shared_ptr<void> ptr;
@@ -187,7 +189,6 @@ public:
 class adamw_states {
 public:
     struct adamw_state_inner {
-        std::vector<void*> params;
         void* exp_avg;
         void* exp_avg_sq;
         void* max_exp_avg_sq;
@@ -199,24 +200,9 @@ public:
             auto exp_avg_sq_tensor = Rcpp::as<Rcpp::XPtr<torch::Tensor>>(list["exp_avg_sq"]);
             auto max_exp_avg_sq_tensor = Rcpp::as<Rcpp::XPtr<torch::Tensor>>(list["max_exp_avg_sq"]);
 
-            Rcpp::Rcout << "CCCC" << std::endl;
-            Rcpp::List params_list = Rcpp::as<Rcpp::List>(list["params"]);
-
-
-            std::vector<void*> params;
-
-            for (auto x : params_list) {
-                // Assuming x is a pointer to a torch::Tensor, convert it back to void*
-                // x was created with make_xptr<torch::Tensor>
-                // cast to an Rcpp::XPtr<torch::Tensor> and then to a void*
-                auto xptr = Rcpp::as<Rcpp::XPtr<torch::Tensor>>(x);
-
-                params.push_back(static_cast<void*>(xptr.get()));
-            }
-
-            exp_avg = static_cast<void*>(exp_avg_tensor.get());
-            exp_avg_sq = static_cast<void*>(exp_avg_sq_tensor.get());
-            max_exp_avg_sq = static_cast<void*>(max_exp_avg_sq_tensor.get());
+            exp_avg = static_cast<void*>(exp_avg_tensor.get()->get());
+            exp_avg_sq = static_cast<void*>(exp_avg_sq_tensor.get()->get());
+            max_exp_avg_sq = static_cast<void*>(max_exp_avg_sq_tensor.get()->get());
             step = Rcpp::as<int64_t>(list["step"]);
         }
     };

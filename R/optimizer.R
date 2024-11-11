@@ -94,7 +94,7 @@ optim_ignite_adamw <- optimizer_ignite(
   initialize = function(params, lr = 1e-3, betas = c(0.9, 0.999), eps = 1e-8,
                        weight_decay = 1e-2, amsgrad = FALSE) {
     # TODO: amsgrad is missing in C++
-    self$ptr <- rcpp_ignite_adamw(list(list(params = params, lr = lr, betas = betas, eps = eps, weight_decay = weight_decay)))
+    self$ptr <- rcpp_ignite_adamw(list(list(params = params, lr = lr, betas = betas, eps = eps, weight_decay = weight_decay, amsgrad = amsgrad)))
 
   },
   get_ptr = function() {

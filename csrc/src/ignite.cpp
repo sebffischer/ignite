@@ -67,30 +67,16 @@ adamw_states ignite_adamw_state(optim_adamw opt) {
   // At least opt$state$map has the keys that correspond to print.default(net$parameters[[1]])
   // We need to re-create this for load_state_dict()
 
-
   adamw_states states;
 
   // map over the ska::flat_map<void*, std::unique_ptr<torch::optim::AdamWParamState>>
   for (const auto& [key, value] : opt->state()) {
-    // Use key and value
-    std::cout << "Key: " << key << ", Value: " << value.get() << std::endl;
+    std::cout << "state added" << std::endl;
+    auto* adamw_param_state = static_cast<torch::optim::AdamWParamState*>(value.get());
+    adamw_state state(*adamw_param_state);
+    states.push_back(state);
   }
-
-  //auto& state_map = opt->state();
-  //// iterate over the values of the ska::flat_map
-  //for (auto& [key, value] : *state_map) {
-  //    // Use key and value
-  //    std::cout << "Key: " << key << ", Value: " << value.get() << std::endl;
-  //    // Here, value is a unique_ptr<OptimizerParamState>, so use value.get() to get the raw pointer
-  //}
-  //for (const auto& pair : state_map) {
-  //  // Since pair.second is a unique_ptr, we need to access it without transferring ownership
-  //  const auto* adamw_param_state = static_cast<const torch::optim::AdamWParamState*>(pair.second.get());
-  //  if (adamw_param_state) {
-  //      // Create a copy of the state since we can't take ownership of the unique_ptr
-  //      adamw_state state_instance(*adamw_param_state);
-  //      states.push_back(state_instance);
-  //  }
+  std::cout << "exiting" << std::endl;
   return states;
 }
 

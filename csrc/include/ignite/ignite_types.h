@@ -16,8 +16,6 @@ using torch_stack = torch::jit::Stack*;
 using optim_adamw_state = torch::optim::AdamWParamState*;
 
 
-
-
 struct sgd_param_group {
     std::vector<torch::Tensor*> params;
     double lr;
@@ -69,15 +67,17 @@ struct adamw_param_group {
     double weight_decay;
     std::pair<double, double> betas;
     double eps;
+    bool amsgrad;
 
     adamw_param_group(
         std::vector<torch::Tensor*> params,
         double learning_rate,
         double weight_decay,
         std::pair<double, double> betas,
-        double eps
+        double eps,
+        bool amsgrad
     )
-        : params(params), lr(learning_rate), weight_decay(weight_decay), betas(betas), eps(eps) {}
+        : params(params), lr(learning_rate), weight_decay(weight_decay), betas(betas), eps(eps), amsgrad(amsgrad) {}
 
     adamw_param_group(
         torch::optim::OptimizerParamGroup& group
@@ -90,6 +90,7 @@ struct adamw_param_group {
         weight_decay = options.weight_decay();
         betas = options.betas();
         eps = options.eps();
+        amsgrad = options.amsgrad();
     }
 
     torch::optim::OptimizerParamGroup to_adamw_group_params() const {
@@ -111,6 +112,7 @@ struct adamw_param_group {
         options.weight_decay(weight_decay);
         options.betas(betas);
         options.eps(eps);
+        options.amsgrad(amsgrad);
         return options;
     }
 };
@@ -118,15 +120,15 @@ struct adamw_param_group {
 using adamw_param_groups = std::vector<adamw_param_group>;
 
 struct adamw_state {
-    torch::Tensor exp_avg;
-    torch::Tensor exp_avg_sq;
-    torch::Tensor max_exp_avg_sq;
+    torch::Tensor* exp_avg;
+    torch::Tensor* exp_avg_sq;
+    torch::Tensor* max_exp_avg_sq;
     int64_t step;
 
     adamw_state(torch::optim::AdamWParamState& state) {
-        exp_avg = state.exp_avg();
-        exp_avg_sq = state.exp_avg_sq();
-        max_exp_avg_sq = state.max_exp_avg_sq();
+        exp_avg = &state.exp_avg();
+        exp_avg_sq = &state.exp_avg_sq();
+        max_exp_avg_sq = &state.max_exp_avg_sq();
         step = state.step();
     }
 };
