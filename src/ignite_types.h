@@ -158,6 +158,8 @@ public:
         // Initialize the member params vector
         for (auto x : params_list) {
             auto xptr = Rcpp::as<Rcpp::XPtr<torch::Tensor>>(x);
+            // xptr is an Rcpp::XPtr<torch::Tensor> and torch::Tensor is an XPtrTorchTensor
+            // to get to the actual torch::Tensor (from libtorch)
             this->params.push_back(static_cast<void*>(xptr.get()->get()));
             std::cout << "another one" << std::endl;
         }

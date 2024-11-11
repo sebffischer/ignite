@@ -1,6 +1,9 @@
 make_adamw = function(...) {
   n = torch::nn_linear(1, 1)
 
+  n$parameters[[1]]
+
+
   o = optim_ignite_adamw(n$parameters)
   x = torch_randn(10, 1)
   y = torch_randn(10, 1)
