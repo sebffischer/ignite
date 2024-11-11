@@ -82,11 +82,11 @@ adamw_param_groups::operator SEXP () const {
 
     for (const auto& param : group.params) {
       auto tensor = torch::Tensor(param);
-      auto xptr = make_xptr<torch::Tensor>(tensor);
+      //auto xptr = make_xptr<torch::Tensor>(tensor);
       // print the address of the tensor
       std::cout << "address of tensor: " << tensor.get() << std::endl;
-      xptr.attr("class") = Rcpp::CharacterVector::create("torch_tensor", "R7");
-      param_lst.push_back(xptr);
+      //xptr.attr("class") = Rcpp::CharacterVector::create("torch_tensor", "R7");
+      //param_lst.push_back(xptr);
     }
 
     // remove all elements from group.params
