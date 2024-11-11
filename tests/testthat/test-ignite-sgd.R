@@ -41,3 +41,13 @@ test_that("...", {
   o$step()
   n$parameters[[1]]
 })
+
+
+test_that("sgd can be cleaned up", {
+  # this used to segfault.
+  o = optim_ignite_sgd(torch::nn_linear(1, 1)$parameters, lr = 0.1)
+  rm("o")
+  gc()
+  gc()
+  expect_true(TRUE)
+})

@@ -5,25 +5,25 @@
 namespace make_raw {
 
 void* SGD(const optim_sgd& x) {
-    return make_ptr<optim_sgd>(x);
+    return x;
 }
 void* Adam(const optim_adam& x) {
-    return make_ptr<optim_adam>(x);
+    return x;
 }
 void* AdamW(const optim_adamw& x) {
-    return make_ptr<optim_adamw>(x);
+    return x;
 }
 void* Adagrad(const optim_adagrad& x) {
-    return make_ptr<optim_adagrad>(x);
+    return x;
 }
 void* RMSprop(const optim_rmsprop& x) {
-    return make_ptr<optim_rmsprop>(x);
+    return x;
 }
 void* ScriptModule(const script_module& x) {
-    return make_ptr<script_module>(x);
+    return x;
 }
 void* TorchStack(const torch_stack& x) {
-    return make_ptr<torch_stack>(x);
+    return x;
 }
 void* OptimParamGroups(const optim_param_groups& x) {
     return make_ptr<optim_param_groups>(x);
