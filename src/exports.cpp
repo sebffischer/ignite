@@ -20,8 +20,12 @@ void rcpp_ignite_adamw_set_param_groups (ignite::optim_adamw opt, ignite::adamw_
    ignite_adamw_set_param_groups(opt.get(), param_groups.get());
 }
 // [[Rcpp::export]]
-ignite::adamw_states rcpp_ignite_adamw_state (ignite::optim_adamw opt) {
-  return  ignite_adamw_state(opt.get());
+ignite::adamw_states rcpp_ignite_adamw_states (ignite::optim_adamw opt) {
+  return  ignite_adamw_states(opt.get());
+}
+// [[Rcpp::export]]
+torch::Tensor rcpp_adamw_state_exp_avg (ignite::adamw_state state) {
+  return  adamw_state_exp_avg(state.get());
 }
 // [[Rcpp::export]]
 torch::TensorList rcpp_ignite_opt_step (Rcpp::XPtr<XPtrTorchScriptModule> network, Rcpp::XPtr<XPtrTorchScriptModule> loss_fn, XPtrTorchStack input, torch::Tensor target, ignite::optim_sgd optimizer) {
@@ -138,4 +142,8 @@ void rcpp_delete_adamw_param_group (void* x) {
 // [[Rcpp::export]]
 void rcpp_delete_adamw_states (void* x) {
    delete_adamw_states(x);
+}
+// [[Rcpp::export]]
+void rcpp_delete_adamw_state (void* x) {
+   delete_adamw_state(x);
 }

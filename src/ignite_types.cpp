@@ -121,34 +121,49 @@ adamw_param_groups::adamw_param_groups(SEXP x) {
 adamw_param_groups::adamw_param_groups (void* x) : ptr(x, rcpp_delete_adamw_param_groups) {};
 
 
+void* adamw_state::get() {
+  return ptr.get();
+}
+
+adamw_state::operator SEXP () const {
+  return R_NilValue;
+}
+
+adamw_state::adamw_state(SEXP x) {
+}
+
+adamw_state::adamw_state (void* x) : ptr(x, rcpp_delete_adamw_state) {};
+
+
 void* adamw_states::get() {
   return ptr.get();
 }
 
 adamw_states::operator SEXP () const {
-  auto inner_ptr = std::static_pointer_cast<std::vector<adamw_state_inner>>(ptr);
 
+  auto* raw_ptr = ptr.get();
+
+  // this pointer is a std::vector<torch::optim::AdamWParamState*>
+
+  // I want to cast it to a std::vector<void*>
+  auto* void_ptr = static_cast<std::vector<void*>*>(raw_ptr);
+
+  // walk over the pointers and call adamw_state_exp_avg on each
   Rcpp::List lst = Rcpp::List::create();
-  for (const auto& state : *inner_ptr) {
-    Rcpp::List group_lst = Rcpp::List::create(
-      Rcpp::Named("exp_avg") = get_tensor_ptr(state.exp_avg),
-      Rcpp::Named("exp_avg_sq") = get_tensor_ptr(state.exp_avg_sq),
-      Rcpp::Named("max_exp_avg_sq") = get_tensor_ptr(state.max_exp_avg_sq),
-      Rcpp::Named("step") = state.step);
-    lst.push_back(group_lst);
+  for (auto* state : *void_ptr) {
+    auto tensor = rcpp_adamw_state_exp_avg(state);
+
+    // convert tensor to xptr
+    auto xptr = make_xptr<torch::Tensor>(&tensor);
+    xptr.attr("class") = Rcpp::CharacterVector::create("torch_tensor", "R7");
+
+    // make
+    lst.push_back(xptr);
   }
   return lst;
 }
 
 adamw_states::adamw_states(SEXP x) {
-  std::vector<adamw_state_inner> states;
-  Rcpp::List list(x);
-  for (size_t i = 0; i < list.size(); ++i) {
-    Rcpp::List state = Rcpp::as<Rcpp::List>(list[i]);
-    adamw_state_inner inner_state(state);
-    states.push_back(inner_state);
-  }
-  ptr = std::make_shared<std::vector<adamw_state_inner>>(states);
 }
 
 adamw_states::adamw_states (void* x) : ptr(x, rcpp_delete_adamw_states) {};

@@ -59,29 +59,20 @@ void ignite_adamw_set_param_groups(optim_adamw opt, adamw_param_groups param_gro
   }
 }
 
-// [[torch::export(register_types=c("adamw_states", "AdamWStates", "void*", "ignite::adamw_states"))]]
-adamw_states ignite_adamw_state(optim_adamw opt) {
-  // each parameter has a state
-  // the thing that is returned by opt->state() is a ska::flat_map<void*, OptimizerParamState>
-  // These are the addresses of the torch::Tensor* I think.
-  // At least opt$state$map has the keys that correspond to print.default(net$parameters[[1]])
-  // We need to re-create this for load_state_dict()
-
+// [[torch::export(register_types=list(c("adamw_states", "AdamWStates", "void*", "ignite::adamw_states"), c("adamw_state", "AdamWState", "void*", "ignite::adamw_state")))]]
+adamw_states ignite_adamw_states(optim_adamw opt) {
   adamw_states states;
-
-  // map over the ska::flat_map<void*, std::unique_ptr<torch::optim::AdamWParamState>>
   for (const auto& [key, value] : opt->state()) {
-    std::cout << "state added" << std::endl;
-    auto* adamw_param_state = static_cast<torch::optim::AdamWParamState*>(value.get());
-    adamw_state state(*adamw_param_state);
-    states.push_back(state);
+    auto* s = static_cast<torch::optim::AdamWParamState*>(value.get());
+    states.push_back(s);
   }
-  std::cout << "exiting" << std::endl;
   return states;
 }
 
-
-
+// [[torch::export]]
+torch::Tensor adamw_state_exp_avg(adamw_state state) {
+  return state->exp_avg();
+}
 
 // [[torch::export(register_types=list(c("script_module", "ScriptModule", "void*", "Rcpp::XPtr<XPtrTorchScriptModule>"), c("torch_stack", "TorchStack", "void*", "XPtrTorchStack")))]]
 std::vector<torch::Tensor> ignite_opt_step(script_module network, script_module loss_fn, torch_stack input, torch::Tensor target, optim_sgd optimizer) {

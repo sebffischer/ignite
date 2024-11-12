@@ -67,7 +67,7 @@ test_that("param_groups works", {
 
 test_that("state_dict works", {
   o = make_adamw(lr = 0.1, momentum = 0.9)
-  sd = o$state_dict()
+  sd = o$state_dict2()
   expect_equal(length(sd), 1)
   expect_equal(sd[[1]]$lr, 0.1)
 })

@@ -42,10 +42,17 @@ IGNITE_API void _ignite_adamw_set_param_groups (void* opt, void* param_groups) {
   } IGNITE_HANDLE_EXCEPTION
   
 }
-adamw_states ignite_adamw_state (optim_adamw opt);
-IGNITE_API void* _ignite_adamw_state (void* opt) {
+adamw_states ignite_adamw_states (optim_adamw opt);
+IGNITE_API void* _ignite_adamw_states (void* opt) {
   try {
-    return  make_raw::AdamWStates(ignite_adamw_state(from_raw::AdamW(opt)));
+    return  make_raw::AdamWStates(ignite_adamw_states(from_raw::AdamW(opt)));
+  } IGNITE_HANDLE_EXCEPTION
+  return (void*) NULL;
+}
+torch::Tensor adamw_state_exp_avg (adamw_state state);
+IGNITE_API void* _adamw_state_exp_avg (void* state) {
+  try {
+    return  make_raw::Tensor(adamw_state_exp_avg(from_raw::AdamWState(state)));
   } IGNITE_HANDLE_EXCEPTION
   return (void*) NULL;
 }
@@ -249,6 +256,13 @@ void delete_adamw_states (void* x);
 IGNITE_API void _delete_adamw_states (void* x) {
   try {
      (delete_adamw_states(x));
+  } IGNITE_HANDLE_EXCEPTION
+  
+}
+void delete_adamw_state (void* x);
+IGNITE_API void _delete_adamw_state (void* x) {
+  try {
+     (delete_adamw_state(x));
   } IGNITE_HANDLE_EXCEPTION
   
 }

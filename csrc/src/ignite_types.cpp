@@ -46,6 +46,9 @@ void* AdamWParamGroups(const adamw_param_groups& x) {
 void* AdamWStates(const adamw_states& x) {
     return make_ptr<adamw_states>(x);
 }
+void* AdamWState(const adamw_state& x) {
+    return make_ptr<adamw_state>(x);
+}
 }
 
 namespace from_raw {
@@ -90,6 +93,9 @@ adamw_param_groups AdamWParamGroups(void* x) {
 }
 adamw_states AdamWStates(void* x) {
     return *reinterpret_cast<adamw_states*>(x);
+}
+adamw_state AdamWState(void* x) {
+    return *reinterpret_cast<adamw_state*>(x);
 }
 }
 
@@ -140,5 +146,12 @@ void delete_adamw_param_group(void* x) {
 
 // [[torch::export]]
 void delete_adamw_states(void* x) {
+    // TODO: I don't think we need this as we only store pointers?
   delete reinterpret_cast<adamw_states*>(x);
+}
+
+// [[torch::export]]
+void delete_adamw_state(void* x) {
+  // TODO: I also don't think we need this as we only own a pointer
+  delete reinterpret_cast<adamw_state*>(x);
 }

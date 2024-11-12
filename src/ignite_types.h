@@ -186,37 +186,26 @@ public:
   void* get ();
 };
 
+
+// TODO: I don't think we need full implementations here as this is only used internally
+// probably no need
+class adamw_state {
+public:
+  std::shared_ptr<void> ptr;
+  adamw_state (void* x);
+  adamw_state (std::shared_ptr<void> x) : ptr(x) {}
+  adamw_state (SEXP x);
+  operator SEXP () const;
+  void* get ();
+};
 class adamw_states {
 public:
-    struct adamw_state_inner {
-        void* exp_avg;
-        void* exp_avg_sq;
-        void* max_exp_avg_sq;
-        int64_t step;
-
-        // Constructor from Rcpp::List
-        adamw_state_inner(Rcpp::List list) {
-            auto exp_avg_tensor = Rcpp::as<Rcpp::XPtr<torch::Tensor>>(list["exp_avg"]);
-            auto exp_avg_sq_tensor = Rcpp::as<Rcpp::XPtr<torch::Tensor>>(list["exp_avg_sq"]);
-            auto max_exp_avg_sq_tensor = Rcpp::as<Rcpp::XPtr<torch::Tensor>>(list["max_exp_avg_sq"]);
-
-            exp_avg = static_cast<void*>(exp_avg_tensor.get()->get());
-            exp_avg_sq = static_cast<void*>(exp_avg_sq_tensor.get()->get());
-            max_exp_avg_sq = static_cast<void*>(max_exp_avg_sq_tensor.get()->get());
-            step = Rcpp::as<int64_t>(list["step"]);
-        }
-    };
-    std::shared_ptr<void> ptr;
-    // constructor from a void* pointer;
-    adamw_states (void* x);
-    // constructor from a shared_ptr<void> pointer;
-    adamw_states (std::shared_ptr<void> x) : ptr(x) {}
-    // constructor from an R object;
-    adamw_states (SEXP x);
-    // implicit casting operator
-    operator SEXP () const;
-    // conversion to a void* pointer;
-    void* get ();
+  std::shared_ptr<void> ptr;
+  adamw_states (void* x);
+  adamw_states (std::shared_ptr<void> x) : ptr(x) {}
+  adamw_states (SEXP x);
+  operator SEXP () const;
+  void* get ();
 };
 
 }

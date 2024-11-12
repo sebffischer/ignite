@@ -101,7 +101,7 @@ optim_ignite_adamw <- optimizer_ignite(
     self$ptr
   },
   state_dict2 = function() {
-    rcpp_ignite_adamw_state(self$ptr)
+    rcpp_ignite_adamw_states(self$ptr)
     # TODO:
   },
   load_state_dict = function(state_dict) {

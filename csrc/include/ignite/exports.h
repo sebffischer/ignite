@@ -31,7 +31,8 @@ IGNITE_API void* _ignite_sgd_get_param_groups (void* opt);
 IGNITE_API void _ignite_sgd_set_param_groups (void* opt, void* param_groups);
 IGNITE_API void* _ignite_adamw_get_param_groups (void* opt);
 IGNITE_API void _ignite_adamw_set_param_groups (void* opt, void* param_groups);
-IGNITE_API void* _ignite_adamw_state (void* opt);
+IGNITE_API void* _ignite_adamw_states (void* opt);
+IGNITE_API void* _adamw_state_exp_avg (void* state);
 IGNITE_API void* _ignite_opt_step (void* network, void* loss_fn, void* input, void* target, void* optimizer);
 IGNITE_API void* _ignite_predict_step (void* network, void* input);
 IGNITE_API void* _ignite_sgd (void* params, double lr, double momentum, double dampening, double weight_decay, bool nesterov);
@@ -61,6 +62,7 @@ IGNITE_API void _delete_sgd_param_group (void* x);
 IGNITE_API void _delete_adamw_param_groups (void* x);
 IGNITE_API void _delete_adamw_param_group (void* x);
 IGNITE_API void _delete_adamw_states (void* x);
+IGNITE_API void _delete_adamw_state (void* x);
 
 #ifdef RCPP_VERSION
 inline void* ignite_sgd_get_param_groups (void* opt) {
@@ -83,8 +85,13 @@ inline void ignite_adamw_set_param_groups (void* opt, void* param_groups) {
   host_exception_handler();
   
 }
-inline void* ignite_adamw_state (void* opt) {
-  auto ret =  _ignite_adamw_state(opt);
+inline void* ignite_adamw_states (void* opt) {
+  auto ret =  _ignite_adamw_states(opt);
+  host_exception_handler();
+  return ret;
+}
+inline void* adamw_state_exp_avg (void* state) {
+  auto ret =  _adamw_state_exp_avg(state);
   host_exception_handler();
   return ret;
 }
@@ -230,6 +237,11 @@ inline void delete_adamw_param_group (void* x) {
 }
 inline void delete_adamw_states (void* x) {
    _delete_adamw_states(x);
+  host_exception_handler();
+  
+}
+inline void delete_adamw_state (void* x) {
+   _delete_adamw_state(x);
   host_exception_handler();
   
 }

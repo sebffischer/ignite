@@ -55,14 +55,25 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
-// rcpp_ignite_adamw_state
-ignite::adamw_states rcpp_ignite_adamw_state(ignite::optim_adamw opt);
-RcppExport SEXP _ignite_rcpp_ignite_adamw_state(SEXP optSEXP) {
+// rcpp_ignite_adamw_states
+ignite::adamw_states rcpp_ignite_adamw_states(ignite::optim_adamw opt);
+RcppExport SEXP _ignite_rcpp_ignite_adamw_states(SEXP optSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< ignite::optim_adamw >::type opt(optSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_ignite_adamw_state(opt));
+    rcpp_result_gen = Rcpp::wrap(rcpp_ignite_adamw_states(opt));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_adamw_state_exp_avg
+torch::Tensor rcpp_adamw_state_exp_avg(ignite::adamw_state state);
+RcppExport SEXP _ignite_rcpp_adamw_state_exp_avg(SEXP stateSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< ignite::adamw_state >::type state(stateSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_adamw_state_exp_avg(state));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -390,6 +401,16 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// rcpp_delete_adamw_state
+void rcpp_delete_adamw_state(void* x);
+RcppExport SEXP _ignite_rcpp_delete_adamw_state(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< void* >::type x(xSEXP);
+    rcpp_delete_adamw_state(x);
+    return R_NilValue;
+END_RCPP
+}
 // ignite_raise_exception
 void ignite_raise_exception();
 RcppExport SEXP _ignite_ignite_raise_exception() {
@@ -405,7 +426,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ignite_rcpp_ignite_sgd_set_param_groups", (DL_FUNC) &_ignite_rcpp_ignite_sgd_set_param_groups, 2},
     {"_ignite_rcpp_ignite_adamw_get_param_groups", (DL_FUNC) &_ignite_rcpp_ignite_adamw_get_param_groups, 1},
     {"_ignite_rcpp_ignite_adamw_set_param_groups", (DL_FUNC) &_ignite_rcpp_ignite_adamw_set_param_groups, 2},
-    {"_ignite_rcpp_ignite_adamw_state", (DL_FUNC) &_ignite_rcpp_ignite_adamw_state, 1},
+    {"_ignite_rcpp_ignite_adamw_states", (DL_FUNC) &_ignite_rcpp_ignite_adamw_states, 1},
+    {"_ignite_rcpp_adamw_state_exp_avg", (DL_FUNC) &_ignite_rcpp_adamw_state_exp_avg, 1},
     {"_ignite_rcpp_ignite_opt_step", (DL_FUNC) &_ignite_rcpp_ignite_opt_step, 5},
     {"_ignite_rcpp_ignite_predict_step", (DL_FUNC) &_ignite_rcpp_ignite_predict_step, 2},
     {"_ignite_rcpp_ignite_sgd", (DL_FUNC) &_ignite_rcpp_ignite_sgd, 6},
@@ -435,6 +457,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ignite_rcpp_delete_adamw_param_groups", (DL_FUNC) &_ignite_rcpp_delete_adamw_param_groups, 1},
     {"_ignite_rcpp_delete_adamw_param_group", (DL_FUNC) &_ignite_rcpp_delete_adamw_param_group, 1},
     {"_ignite_rcpp_delete_adamw_states", (DL_FUNC) &_ignite_rcpp_delete_adamw_states, 1},
+    {"_ignite_rcpp_delete_adamw_state", (DL_FUNC) &_ignite_rcpp_delete_adamw_state, 1},
     {"_ignite_ignite_raise_exception", (DL_FUNC) &_ignite_ignite_raise_exception, 0},
     {NULL, NULL, 0}
 };

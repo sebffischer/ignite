@@ -13,7 +13,9 @@ using optim_rmsprop = torch::optim::RMSprop*;
 using script_module = torch::jit::script::Module*;
 using torch_stack = torch::jit::Stack*;
 
-using optim_adamw_state = torch::optim::AdamWParamState*;
+// it is a vector so on the Rcpp side we can cast it to a std::vector<void*> and iterate over it.
+using adamw_state = torch::optim::AdamWParamState*;
+using adamw_states = std::vector<adamw_state>;
 
 
 struct sgd_param_group {
@@ -119,22 +121,6 @@ struct adamw_param_group {
 
 using adamw_param_groups = std::vector<adamw_param_group>;
 
-struct adamw_state {
-    torch::Tensor* exp_avg;
-    torch::Tensor* exp_avg_sq;
-    torch::Tensor* max_exp_avg_sq;
-    int64_t step;
-
-    adamw_state(torch::optim::AdamWParamState& state) {
-        exp_avg = &state.exp_avg();
-        exp_avg_sq = &state.exp_avg_sq();
-        max_exp_avg_sq = &state.max_exp_avg_sq();
-        step = state.step();
-    }
-};
-
-using adamw_states = std::vector<adamw_state>;
-
 // casting to and from raw pointers
 namespace make_raw {
     void* SGD(const optim_sgd& x);
@@ -151,6 +137,7 @@ namespace make_raw {
     void* AdamWParamGroups(const adamw_param_groups& x);
     void* AdamWParamGroup(const adamw_param_group& x);
     void* AdamWStates(const adamw_states& x);
+    void* AdamWState(const adamw_state& x);
 }
 
 namespace from_raw {
@@ -168,4 +155,5 @@ namespace from_raw {
     adamw_param_groups AdamWParamGroups(void* x);
     adamw_param_group AdamWParamGroup(void* x);
     adamw_states AdamWStates(void* x);
+    adamw_state AdamWState(void* x);
 }
