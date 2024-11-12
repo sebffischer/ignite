@@ -1,5 +1,5 @@
 make_adamw = function(...) {
-  n = torch::nn_linear(1, 1)
+  n = torch::nn_linear(1, 1, bias = F)
 
   n$parameters[[1]]
 
@@ -18,6 +18,10 @@ make_adamw = function(...) {
   o
 }
 
+test_that("params are part of the param_groups", {
+
+})
+
 test_that("constructor arguments are passed to the optimizer", {
   library(torch)
   library(ignite)
@@ -28,7 +32,18 @@ test_that("constructor arguments are passed to the optimizer", {
   betas = c(0.789, 0.123)
   eps = 0.01
   amsgrad = sample(c(TRUE, FALSE), 1)
-  o = make_adamw(n$parameters, amsgrad = TRUE)
+  o = make_adamw()
+  x = o$state_dict()
+  # TODO: Test that no segfaults
+  # test that step is a long
+  # test that the order is preserved
+  # test that we can also set the state
+  o$state_dict2()
+  expect_equal()
+  gc(); gc()
+  gs = o$state_dict2()
+  gs = o$state_dict2()
+  gc(); gc()
   # When we bind the param_groups to a variable, then calling gc() will not segfault
   # only when we again bind the param_groups to a variabe and call gc() will it segfault
   #
@@ -46,6 +61,10 @@ test_that("constructor arguments are passed to the optimizer", {
   expect_equal(o$param_groups[[1]]$betas, betas)
   expect_equal(o$param_groups[[1]]$eps, eps)
   expect_equal(o$param_groups[[1]]$amsgrad, amsgrad)
+})
+
+test_that("loading a state dict works", {
+  # TODO: Focus also on the order.
 })
 
 test_that("param_groups works", {
@@ -67,7 +86,7 @@ test_that("param_groups works", {
 
 test_that("state_dict works", {
   o = make_adamw(lr = 0.1, momentum = 0.9)
-  sd = o$state_dict2()
+  sd = o$state_dict()
   expect_equal(length(sd), 1)
   expect_equal(sd[[1]]$lr, 0.1)
 })

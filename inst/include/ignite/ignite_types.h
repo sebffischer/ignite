@@ -2,9 +2,7 @@
 #include <torch/torch.h>
 #include <vector>
 
-using optim_param_groups = std::vector<torch::optim::OptimizerParamGroup>;
-using optim_param_group = torch::optim::OptimizerParamGroup;
-
+using optim = torch::optim::Optimizer*;
 using optim_sgd = torch::optim::SGD*;
 using optim_adam = torch::optim::Adam*;
 using optim_adamw = torch::optim::AdamW*;
@@ -17,112 +15,25 @@ using torch_stack = torch::jit::Stack*;
 using adamw_state = torch::optim::AdamWParamState*;
 using adamw_states = std::vector<adamw_state>;
 
+// To implement param_groups for the R optimizer, we work with OptimizerParamGroup,
+// which gives direct access to the parameters.
+// To get access to the optimizer options (lr etc.) we need to downcast to the specific optimizer type.
 
-struct sgd_param_group {
-    std::vector<torch::Tensor*> params;
-    double lr;
-    double weight_decay;
-    double momentum;      // Momentum factor
-    double dampening;    // Dampening for momentum
-    bool nesterov;       // Enables Nesterov momentum
+using optim_param_group = torch::optim::OptimizerParamGroup*;
+using optim_param_groups = std::vector<optim_param_group>;
 
-    sgd_param_group(
-        std::vector<torch::Tensor*> params,
-        double learning_rate,
-        double weight_decay,
-        double momentum,
-        double dampening,
-        bool nesterov
-    )
-        : params(params), lr(learning_rate), weight_decay(weight_decay), momentum(momentum), dampening(dampening), nesterov(nesterov) {}
+// even though all optimizers store their param groups in a std::vector<torch::optim::OptimizerParamGroup*>,
+// we need different types for the different optimizers because we need to know from the type
+// How to convert it to the Rcpp type.
 
-    sgd_param_group(
-        torch::optim::OptimizerParamGroup& group
-    ) {
-        std::vector<torch::Tensor*> params;
-        for (torch::Tensor& param : group.params()) {
-            params.push_back(&param);
-        }
-        auto& options = static_cast<torch::optim::SGDOptions&>(group.options());
-        lr = options.lr();
-        weight_decay = options.weight_decay();
-        momentum = options.momentum();
-        dampening = options.dampening();
-        nesterov = options.nesterov();
-    }
-
-    torch::optim::SGDOptions to_sgd_options() const {
-        auto options = torch::optim::SGDOptions(lr);
-        options.weight_decay(weight_decay);
-        options.momentum(momentum);
-        options.dampening(dampening);
-        options.nesterov(nesterov);
-        return options;
-    }
+struct adamw_param_groups {
+    optim_param_groups groups;
 };
 
-using sgd_param_groups = std::vector<sgd_param_group>;
+using adamw_param_group = torch::optim::AdamWOptions*;
 
-struct adamw_param_group {
-    std::vector<torch::Tensor*> params;
-    double lr;
-    double weight_decay;
-    std::pair<double, double> betas;
-    double eps;
-    bool amsgrad;
-
-    adamw_param_group(
-        std::vector<torch::Tensor*> params,
-        double learning_rate,
-        double weight_decay,
-        std::pair<double, double> betas,
-        double eps,
-        bool amsgrad
-    )
-        : params(params), lr(learning_rate), weight_decay(weight_decay), betas(betas), eps(eps), amsgrad(amsgrad) {}
-
-    adamw_param_group(
-        torch::optim::OptimizerParamGroup& group
-    ) {
-        for (torch::Tensor& param : group.params()) {
-            params.push_back(&param);
-        }
-        auto& options = static_cast<torch::optim::AdamWOptions&>(group.options());
-        lr = options.lr();
-        weight_decay = options.weight_decay();
-        betas = options.betas();
-        eps = options.eps();
-        amsgrad = options.amsgrad();
-    }
-
-    torch::optim::OptimizerParamGroup to_adamw_group_params() const {
-        std::vector<torch::Tensor> params_vec;
-        std::cout << "params length in ignite_adamw: " << params.size() << std::endl;
-        for (auto* param : params) {
-            std::cout << "dimension of the tensor: " << param->dim() << std::endl;
-            std::cout << "Hello" << std::endl;
-            params_vec.push_back(*param);
-            // print dimension of the tensor
-        }
-        // print the
-        auto options = to_adamw_options();
-        return torch::optim::OptimizerParamGroup(params_vec, std::make_unique<torch::optim::AdamWOptions>(options));
-    }
-
-    torch::optim::AdamWOptions to_adamw_options() const {
-        auto options = torch::optim::AdamWOptions(lr);
-        options.weight_decay(weight_decay);
-        options.betas(betas);
-        options.eps(eps);
-        options.amsgrad(amsgrad);
-        return options;
-    }
-};
-
-using adamw_param_groups = std::vector<adamw_param_group>;
-
-// casting to and from raw pointers
 namespace make_raw {
+    void* Optim(const optim& x);
     void* SGD(const optim_sgd& x);
     void* Adam(const optim_adam& x);
     void* AdamW(const optim_adamw& x);
@@ -132,15 +43,13 @@ namespace make_raw {
     void* TorchStack(const torch_stack& x);
     void* OptimParamGroups(const optim_param_groups& x);
     void* OptimParamGroup(const optim_param_group& x);
-    void* SGDParamGroups(const sgd_param_groups& x);
-    void* SGDParamGroup(const sgd_param_group& x);
     void* AdamWParamGroups(const adamw_param_groups& x);
-    void* AdamWParamGroup(const adamw_param_group& x);
     void* AdamWStates(const adamw_states& x);
     void* AdamWState(const adamw_state& x);
 }
 
 namespace from_raw {
+    optim Optim(void* x);
     optim_sgd SGD(void* x);
     optim_adam Adam(void* x);
     optim_adamw AdamW(void* x);
@@ -150,8 +59,6 @@ namespace from_raw {
     torch_stack TorchStack(void* x);
     optim_param_groups OptimParamGroups(void* x);
     optim_param_group OptimParamGroup(void* x);
-    sgd_param_groups SGDParamGroups(void* x);
-    sgd_param_group SGDParamGroup(void* x);
     adamw_param_groups AdamWParamGroups(void* x);
     adamw_param_group AdamWParamGroup(void* x);
     adamw_states AdamWStates(void* x);

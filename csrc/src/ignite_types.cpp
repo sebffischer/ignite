@@ -4,6 +4,9 @@
 
 namespace make_raw {
 
+void* Optim(const optim& x) {
+    return x;
+}
 void* SGD(const optim_sgd& x) {
     return x;
 }
@@ -31,16 +34,11 @@ void* OptimParamGroups(const optim_param_groups& x) {
 void* OptimParamGroup(const optim_param_group& x) {
     return make_ptr<optim_param_group>(x);
 }
-void* SGDParamGroup(const sgd_param_group& x) {
-    return make_ptr<sgd_param_group>(x);
-}
-void* SGDParamGroups(const sgd_param_groups& x) {
-    return make_ptr<sgd_param_groups>(x);
-}
 void* AdamWParamGroup(const adamw_param_group& x) {
     return make_ptr<adamw_param_group>(x);
 }
 void* AdamWParamGroups(const adamw_param_groups& x) {
+    // TODO: I think we need to access the groups here
     return make_ptr<adamw_param_groups>(x);
 }
 void* AdamWStates(const adamw_states& x) {
@@ -52,14 +50,17 @@ void* AdamWState(const adamw_state& x) {
 }
 
 namespace from_raw {
+optim Optim(void* x) {
+    return reinterpret_cast<optim>(x);
+}
 optim_sgd SGD(void* x) {
-    return *reinterpret_cast<optim_sgd*>(x);
+    return reinterpret_cast<optim_sgd>(x);
 }
 optim_adam Adam(void* x) {
-    return *reinterpret_cast<optim_adam*>(x);
+    return reinterpret_cast<optim_adam>(x);
 }
 optim_adamw AdamW(void* x) {
-    return *reinterpret_cast<optim_adamw*>(x);
+    return reinterpret_cast<optim_adamw>(x);
 }
 optim_adagrad Adagrad(void* x) {
     return *reinterpret_cast<optim_adagrad*>(x);
@@ -79,18 +80,6 @@ optim_param_groups OptimParamGroups(void* x) {
 optim_param_group OptimParamGroup(void* x) {
     return *reinterpret_cast<optim_param_group*>(x);
 }
-sgd_param_groups SGDParamGroups(void* x) {
-    return *reinterpret_cast<sgd_param_groups*>(x);
-}
-sgd_param_group SGDParamGroup(void* x) {
-    return *reinterpret_cast<sgd_param_group*>(x);
-}
-adamw_param_group AdamWParamGroup(void* x) {
-    return *reinterpret_cast<adamw_param_group*>(x);
-}
-adamw_param_groups AdamWParamGroups(void* x) {
-    return *reinterpret_cast<adamw_param_groups*>(x);
-}
 adamw_states AdamWStates(void* x) {
     return *reinterpret_cast<adamw_states*>(x);
 }
@@ -99,6 +88,10 @@ adamw_state AdamWState(void* x) {
 }
 }
 
+// [[torch::export]]
+void delete_optim(void* x) {
+  delete reinterpret_cast<optim>(x);
+}
 // [[torch::export]]
 void delete_optim_sgd(void* x) {
   delete reinterpret_cast<optim_sgd>(x);
@@ -128,14 +121,6 @@ void delete_optim_param_group(void* x) {
   delete reinterpret_cast<optim_param_group*>(x);
 }
 // [[torch::export]]
-void delete_sgd_param_groups(void* x) {
-  delete reinterpret_cast<sgd_param_groups*>(x);
-}
-// [[torch::export]]
-void delete_sgd_param_group(void* x) {
-  delete reinterpret_cast<sgd_param_group*>(x);
-}
-// [[torch::export]]
 void delete_adamw_param_groups(void* x) {
   delete reinterpret_cast<adamw_param_groups*>(x);
 }
@@ -146,12 +131,10 @@ void delete_adamw_param_group(void* x) {
 
 // [[torch::export]]
 void delete_adamw_states(void* x) {
-    // TODO: I don't think we need this as we only store pointers?
   delete reinterpret_cast<adamw_states*>(x);
 }
 
 // [[torch::export]]
 void delete_adamw_state(void* x) {
-  // TODO: I also don't think we need this as we only own a pointer
-  delete reinterpret_cast<adamw_state*>(x);
+  delete reinterpret_cast<adamw_state>(x);
 }

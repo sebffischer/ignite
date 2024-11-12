@@ -12,70 +12,155 @@
 
 #include <torch/script.h>  // One-stop header.
 
-// [[torch::export(register_types=c("sgd_param_groups", "SGDParamGroups", "void*", "ignite::sgd_param_groups"))]]
-sgd_param_groups ignite_sgd_get_param_groups(optim_sgd opt) {
-  // iterate over the param groups and call ignite_sgd_get_param_group for each one and push the results into a vector
-  sgd_param_groups param_groups;
+
+// this is working for all optimizers
+
+optim_param_groups ignite_get_param_groups(optim opt) {
+  // this works for all optimizers.
+  // However in Rcpp -> SEXP conversion we then iterate over the void*s and call a optimizer-specific getter
+  std::vector<optim_param_group> param_groups;
+  // we convert to a vector of pointers so we can iterate over it on the Rcpp side
+  // (we know the size of void pointers)
   for (torch::optim::OptimizerParamGroup& group : opt->param_groups()) {
-    param_groups.push_back(sgd_param_group(group));
+    param_groups.push_back(&group);
   }
+
   return param_groups;
-}
-
-// [[torch::export]]
-void ignite_sgd_set_param_groups(optim_sgd opt, sgd_param_groups param_groups) {
-  if (opt->param_groups().size() != param_groups.size()) {
-    throw std::runtime_error("Parameter groups have different lengths");
-  }
-
-  // zip the param_groups and opt->param_groups by iterating over the indices
-  for (size_t i = 0; i < opt->param_groups().size(); ++i) {
-    auto& opt_group = opt->param_groups()[i];
-    auto& param_group = param_groups[i];
-    // TODO check that the params all point to the same tensors
-    opt_group.set_options(std::make_unique<torch::optim::SGDOptions>(param_group.to_sgd_options()));
-  }
 }
 
 // [[torch::export(register_types=c("adamw_param_groups", "AdamWParamGroups", "void*", "ignite::adamw_param_groups"))]]
-adamw_param_groups ignite_adamw_get_param_groups(optim_adamw opt) {
-  adamw_param_groups param_groups;
-  for (torch::optim::OptimizerParamGroup& group : opt->param_groups()) {
-    param_groups.push_back(adamw_param_group(group));
-  }
+adamw_param_groups ignite_adamw_get_param_groups(optim_adamw groups) {
+  std::cout << "ignite_adamw_get_param_groups" << std::endl;
+  adamw_param_groups param_groups = { ignite_get_param_groups(groups) };
   return param_groups;
 }
 
-// [[torch::export]]
-void ignite_adamw_set_param_groups(optim_adamw opt, adamw_param_groups param_groups) {
-  if (opt->param_groups().size() != param_groups.size()) {
-    throw std::runtime_error("Parameter groups have different lengths");
-  }
-  // zip the param_groups and opt->param_groups by iterating over the indices
-  for (size_t i = 0; i < opt->param_groups().size(); ++i) {
-    auto& opt_group = opt->param_groups()[i];
-    auto& param_group = param_groups[i];
-    opt_group.set_options(std::make_unique<torch::optim::AdamWOptions>(param_group.to_adamw_options()));
-  }
+// [[torch::export(register_types=c("optim_param_group", "OptimParamGroup", "void*", "ignite::optim_param_group"))]]
+std::vector<torch::Tensor> ignite_optim_get_param_group_params(optim_param_group group) {
+  auto pars = group->params();
+  // print dim of pars
+  std::cout << "dimension of the params: " << pars[0].dim() << std::endl;
+
+  return pars;
 }
 
+// [[torch::export]]
+double ignite_optim_get_param_group_lr(optim_param_group group) {
+  return group->options().get_lr();
+}
+
+//sgd_param_groups ignite_sgd_get_param_groups(optim_sgd opt) {
+//  // iterate over the param groups and call ignite_sgd_get_param_group for each one and push the results into a vector
+//  sgd_param_groups param_groups;
+//  for (torch::optim::OptimizerParamGroup& group : opt->param_groups()) {
+//    param_groups.push_back(sgd_param_group(group));
+//  }
+//  return param_groups;
+//}
+//
+//void ignite_sgd_set_param_groups(optim_sgd opt, sgd_param_groups param_groups) {
+//  if (opt->param_groups().size() != param_groups.size()) {
+//    throw std::runtime_error("Parameter groups have different lengths");
+//  }
+//
+//  // zip the param_groups and opt->param_groups by iterating over the indices
+//  for (size_t i = 0; i < opt->param_groups().size(); ++i) {
+//    auto& opt_group = opt->param_groups()[i];
+//    auto& param_group = param_groups[i];
+//    // TODO check that the params all point to the same tensors
+//    opt_group.set_options(std::make_unique<torch::optim::SGDOptions>(param_group.to_sgd_options()));
+//  }
+//}
+
+//void ignite_adamw_set_param_groups(optim_adamw opt, adamw_param_groups param_groups) {
+//  if (opt->param_groups().size() != param_groups.size()) {
+//    throw std::runtime_error("Parameter groups have different lengths");
+//  }
+//  // zip the param_groups and opt->param_groups by iterating over the indices
+//  for (size_t i = 0; i < opt->param_groups().size(); ++i) {
+//    auto& opt_group = opt->param_groups()[i];
+//    auto& param_group = param_groups[i];
+//    opt_group.set_options(std::make_unique<torch::optim::AdamWOptions>(param_group.to_adamw_options()));
+//  }
+//}
+
 // [[torch::export(register_types=list(c("adamw_states", "AdamWStates", "void*", "ignite::adamw_states"), c("adamw_state", "AdamWState", "void*", "ignite::adamw_state")))]]
-adamw_states ignite_adamw_states(optim_adamw opt) {
+adamw_states ignite_adamw_get_states(optim_adamw opt) {
+  // TODO: Maybe rename to ignite_get_adamw_states
+
+  // we need to pay attention to the ordering here
+  // iterating over an ska::flat_hash_map does not preserve the order
   adamw_states states;
   for (const auto& [key, value] : opt->state()) {
+    std::cout << "adamw_states: key" << key << std::endl;
     auto* s = static_cast<torch::optim::AdamWParamState*>(value.get());
+    // print the dimension of the exp_avg tensor
+    std::cout << "dimension of the exp_avg tensor: " << s->exp_avg().dim() << std::endl;
     states.push_back(s);
   }
   return states;
 }
 
+//void ignite_adamw_set_states(optim_adamw opt, adamw_states states) {
+//  auto opt_states = opt->state();
+//  // check that lengths are the same
+//  if (opt_states.size() != states.size()) {
+//    throw std::runtime_error("State lengths are different");
+//  }
+//
+//  // iterate over the indices
+//  for (size_t i = 0; i < opt_states.size(); ++i) {
+//    // cast the opt state to a AdamWParamState
+//    auto* state = static_cast<torch::optim::AdamWParamState*>(opt_states[i].get());
+//    // cast the opt state to a AdamWParamState
+//    state->exp_avg(state)
+//
+//    opt_state = std::move(state);
+//  }
+//
+//    // we need to handle the ordering here
+//
+//  for (const auto& [key, value] : opt->state()) {
+//
+//    std::cout << "adamw_states: key" << key << std::endl;
+//    auto* s = static_cast<torch::optim::AdamWParamState*>(value.get());
+//    // print the dimension of the exp_avg tensor
+//    std::cout << "dimension of the exp_avg tensor: " << s->exp_avg().dim() << std::endl;
+//    states.push_back(s);
+//  }
+//  return states;
+//}
+
+
+// FIXME: We can just return a list of tensors or a tuple?
+
 // [[torch::export]]
 torch::Tensor adamw_state_exp_avg(adamw_state state) {
-  return state->exp_avg();
+  auto x = state->exp_avg();
+  return x;
+}
+// [[torch::export]]
+torch::Tensor adamw_state_exp_avg_sq(adamw_state state) {
+  auto x = state->exp_avg();
+  return x;
+}
+// [[torch::export]]
+torch::Tensor adamw_state_max_exp_avg_sq(adamw_state state) {
+  auto x = state->max_exp_avg_sq();
+  return x;
+}
+// [[torch::export]]
+torch::Tensor adamw_state_step(adamw_state state) {
+  auto step = state->step();
+  // step is a long long, but R ints are 32 bit, so we represent it as a torch tensor which allows
+  // for higher precision
+  // this is also consistent with how the R adamw returns the step
+  auto step_tensor = torch::scalar_tensor(step, torch::kLong);
+  return step_tensor;
 }
 
-// [[torch::export(register_types=list(c("script_module", "ScriptModule", "void*", "Rcpp::XPtr<XPtrTorchScriptModule>"), c("torch_stack", "TorchStack", "void*", "XPtrTorchStack")))]]
-std::vector<torch::Tensor> ignite_opt_step(script_module network, script_module loss_fn, torch_stack input, torch::Tensor target, optim_sgd optimizer) {
+// [[torch::export(register_types=list(c("script_module", "ScriptModule", "void*", "Rcpp::XPtr<XPtrTorchScriptModule>"), c("torch_stack", "TorchStack", "void*", "XPtrTorchStack"), c("optim", "Optim", "void*", "ignite::optim")))]]
+std::vector<torch::Tensor> ignite_opt_step(script_module network, script_module loss_fn, torch_stack input, torch::Tensor target, optim optimizer) {
   optimizer->zero_grad();
 
   auto out = (*network)(*input);
@@ -100,80 +185,18 @@ torch::Tensor ignite_predict_step(script_module network, torch_stack input) {
   return out.toTensor();
 }
 
+// TODO: Add betas as a tuple
+// [[torch::export(register_types=c("optim_adamw", "AdamW", "void*", "ignite::optim_adamw"))]]
+optim_adamw ignite_adamw(torch::TensorList params, double lr, double beta1, double beta2,
+                        double eps, double weight_decay, bool amsgrad) {
 
-// implementations of optimizers
-
-// [[torch::export(register_types=c("optim_sgd", "SGD", "void*", "ignite::optim_sgd"))]]
-optim_sgd ignite_sgd(torch::TensorList params, double lr, double momentum, double dampening,
-                        double weight_decay, bool nesterov) {
-
-  auto options = torch::optim::SGDOptions(lr)
-    .momentum(momentum)
-    .dampening(dampening)
-    .weight_decay(weight_decay)
-    .nesterov(nesterov);
-
-  auto o = new torch::optim::SGD(params.vec(), options);
-
-  return o;
-}
-
-// [[torch::export]]
-void ignite_sgd_step(optim_sgd opt) {
-  opt->step();
-}
-
-// [[torch::export]]
-void ignite_sgd_zero_grad(optim_sgd opt) {
-  opt->zero_grad();
-}
-
-//// [[torch::export]]
-//double ignite_sgd_get_momentum(optim_param_group group) {
-//  auto& sgd_options = static_cast<torch::optim::SGDOptions&>(group.options());
-//  return sgd_options.momentum();
-//}
-//
-//// [[torch::export]]
-//double ignite_sgd_set_momentum(optim_param_group group, double momentum) {
-//}
-
-
-// [[torch::export(register_types=c("optim_adam", "Adam", "void*", "ignite::optim_adam"))]]
-optim_adam ignite_adam(torch::TensorList params, double lr, double beta1, double beta2,
-                      double eps, double weight_decay, bool amsgrad) {
-  auto options = torch::optim::AdamOptions(lr)
+  auto options = torch::optim::AdamWOptions(lr)
     .betas(std::make_tuple(beta1, beta2))
     .eps(eps)
     .weight_decay(weight_decay)
     .amsgrad(amsgrad);
-  return new torch::optim::Adam(params.vec(), options);
-}
 
-// [[torch::export]]
-void ignite_adam_step(optim_adam opt) {
-  opt->step();
-}
-
-// [[torch::export]]
-void ignite_adam_zero_grad(optim_adam opt) {
-  opt->zero_grad();
-}
-
-// [[torch::export(register_types=c("optim_adamw", "AdamW", "void*", "ignite::optim_adamw"))]]
-optim_adamw ignite_adamw(adamw_param_groups groups) {
-
-  // iterate over the groups and convert each to a torch::optim::OptimizerParamGroup
-  std::vector<torch::optim::OptimizerParamGroup> param_groups;
-  for (const auto& group : groups) {
-    std::cout << "group" << std::endl;
-    param_groups.push_back(group.to_adamw_group_params());
-  }
-
-
-  auto x = new torch::optim::AdamW(param_groups);
-  std::cout << "adamw created" << std::endl;
-  return x;
+  return new torch::optim::AdamW(params.vec(), options);
 }
 
 // [[torch::export]]
@@ -183,49 +206,6 @@ void ignite_adamw_step(optim_adamw opt) {
 
 // [[torch::export]]
 void ignite_adamw_zero_grad(optim_adamw opt) {
-  opt->zero_grad();
-}
-
-// [[torch::export(register_types=c("optim_adagrad", "Adagrad", "void*", "ignite::optim_adagrad"))]]
-optim_adagrad ignite_adagrad(torch::TensorList params, double lr, double lr_decay, double weight_decay,
-                            double initial_accumulator_value, double eps) {
-  auto options = torch::optim::AdagradOptions(lr)
-    .lr_decay(lr_decay)
-    .weight_decay(weight_decay)
-    .initial_accumulator_value(initial_accumulator_value)
-    .eps(eps);
-  return new torch::optim::Adagrad(params.vec(), options);
-}
-
-// [[torch::export]]
-void ignite_adagrad_step(optim_adagrad opt) {
-  opt->step();
-}
-
-// [[torch::export]]
-void ignite_adagrad_zero_grad(optim_adagrad opt) {
-  opt->zero_grad();
-}
-
-// [[torch::export(register_types=c("optim_rmsprop", "RMSprop", "void*", "ignite::optim_rmsprop"))]]
-optim_rmsprop ignite_rmsprop(torch::TensorList params, double lr, double alpha, double eps,
-                            double weight_decay, double momentum, bool centered) {
-  auto options = torch::optim::RMSpropOptions(lr)
-    .alpha(alpha)
-    .eps(eps)
-    .weight_decay(weight_decay)
-    .momentum(momentum)
-    .centered(centered);
-  return new torch::optim::RMSprop(params.vec(), options);
-}
-
-// [[torch::export]]
-void ignite_rmsprop_step(optim_rmsprop opt) {
-  opt->step();
-}
-
-// [[torch::export]]
-void ignite_rmsprop_zero_grad(optim_rmsprop opt) {
   opt->zero_grad();
 }
 

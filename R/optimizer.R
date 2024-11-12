@@ -5,8 +5,18 @@
 #' Failing to implement this contract will lead to undefined behavior and possibly segfaults when
 #' this expected, e.g. by the [`Igniter`] class.
 #' @inheritParams torch::optimizer
+#' @section State Dict:
+#' The `$state_dict()` method returns a list with two elements:
+#' - `param_groups`: A list of parameter groups.
+#'   Each parameter group contains a field:
+#'   - `params`: An integer vector indicating the indices of the parameters in the optimizer.
+#'   - other arbitrary fields such as `lr`, `weight_decay`, etc.
+#' - `states`: A list of optimizer states. The length of this list is the same as the number of parameters.
+#'    The structure of the optimizer states is specific to the optimizer.
+#' @section Loading State Dict:
+#' The `$load_state_dict()` method loads the state dict.
 #' @export
-optimizer_ignite = function (name = NULL, inherit = getFromNamespace("Optimizer", "torch"), ..., private = NULL,
+optimizer_ignite = function (name = NULL, ..., private = NULL,
   active = NULL, parent_env = parent.frame()) {
   get_ptr = list(...)$get_ptr
   if (!is.function(get_ptr)) {
@@ -17,7 +27,7 @@ optimizer_ignite = function (name = NULL, inherit = getFromNamespace("Optimizer"
 
   torch::optimizer(
     name = c(name, "optim_ignite"),
-    inherit = inherit,
+    inherit = NULL,
     ...,
     private = private,
     active = active,
@@ -93,19 +103,41 @@ optim_ignite_adamw <- optimizer_ignite(
   "optim_ignite_adamw",
   initialize = function(params, lr = 1e-3, betas = c(0.9, 0.999), eps = 1e-8,
                        weight_decay = 1e-2, amsgrad = FALSE) {
-    # TODO: amsgrad is missing in C++
-    self$ptr <- rcpp_ignite_adamw(list(list(params = params, lr = lr, betas = betas, eps = eps, weight_decay = weight_decay, amsgrad = amsgrad)))
-
+    self$ptr <- rcpp_ignite_adamw(params = params, lr = lr, beta1 = betas[1], beta2 = betas[2], eps = eps, weight_decay = weight_decay, amsgrad = amsgrad)
   },
   get_ptr = function() {
     self$ptr
   },
-  state_dict2 = function() {
-    rcpp_ignite_adamw_states(self$ptr)
-    # TODO:
+  state_dict = function() {
+    # the param_groups actually contain the parameters that are optimized.
+    # But we don't want to return them as part of the state dict.
+    # Therefore, we unlist all the parameters and store the indices in the state dict.
+    param_groups = self$param_groups
+    parameters <- unlist(lapply(param_groups, function(x) x$params))
+    parameters <- sapply(parameters, torch:::xptr_address)
+
+
+    param_groups = lapply(param_groups, function(group) {
+      group_param <- sapply(group$params, torch:::xptr_address)
+      group$params <- match(group_param, parameters)
+      group
+    })
+
+    list(
+      param_groups = param_groups,
+      states = rcpp_ignite_adamw_get_states(self$ptr)
+    )
   },
   load_state_dict = function(state_dict) {
-    # TODO:
+    #if (!length(self$param_groups) == length(state_dict$param_groups)) {
+    #  torch:::value_error("Loaded state dict has a different number of parameter groups")
+    #}
+    #for (i in seq_along(self$param_groups)) {
+    #  if (!length(self$param_groups[[i]]$params) == length(state_dict$param_groups[[i]]$params)) {
+    #    torch:::value_error("Loaded state dict has contains a parameter group that doesn't match the size of optimizers group.")
+    #  }
+    #}
+    rcpp_ignite_set_adamw_states(self$ptr, state_dict)
   },
   step = function() {
     rcpp_ignite_adamw_step(self$ptr)
@@ -114,6 +146,7 @@ optim_ignite_adamw <- optimizer_ignite(
     rcpp_ignite_adamw_zero_grad(self$ptr)
   },
   active = list(
+    # TODO: Add the params as an integer vector.
     param_groups = function(rhs) {
       if (!missing(rhs)) {
         rcpp_ignite_sgd_set_param_groups(self$get_ptr(), rhs)

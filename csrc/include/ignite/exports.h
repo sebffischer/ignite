@@ -27,29 +27,20 @@ extern void* p_ignite_last_error;
 IGNITE_API void* ignite_last_error ();
 IGNITE_API void ignite_last_error_clear();
 
-IGNITE_API void* _ignite_sgd_get_param_groups (void* opt);
-IGNITE_API void _ignite_sgd_set_param_groups (void* opt, void* param_groups);
-IGNITE_API void* _ignite_adamw_get_param_groups (void* opt);
-IGNITE_API void _ignite_adamw_set_param_groups (void* opt, void* param_groups);
-IGNITE_API void* _ignite_adamw_states (void* opt);
+IGNITE_API void* _ignite_adamw_get_param_groups (void* groups);
+IGNITE_API void* _ignite_optim_get_param_group_params (void* group);
+IGNITE_API double _ignite_optim_get_param_group_lr (void* group);
+IGNITE_API void* _ignite_adamw_get_states (void* opt);
 IGNITE_API void* _adamw_state_exp_avg (void* state);
+IGNITE_API void* _adamw_state_exp_avg_sq (void* state);
+IGNITE_API void* _adamw_state_max_exp_avg_sq (void* state);
+IGNITE_API void* _adamw_state_step (void* state);
 IGNITE_API void* _ignite_opt_step (void* network, void* loss_fn, void* input, void* target, void* optimizer);
 IGNITE_API void* _ignite_predict_step (void* network, void* input);
-IGNITE_API void* _ignite_sgd (void* params, double lr, double momentum, double dampening, double weight_decay, bool nesterov);
-IGNITE_API void _ignite_sgd_step (void* opt);
-IGNITE_API void _ignite_sgd_zero_grad (void* opt);
-IGNITE_API void* _ignite_adam (void* params, double lr, double beta1, double beta2, double eps, double weight_decay, bool amsgrad);
-IGNITE_API void _ignite_adam_step (void* opt);
-IGNITE_API void _ignite_adam_zero_grad (void* opt);
-IGNITE_API void* _ignite_adamw (void* groups);
+IGNITE_API void* _ignite_adamw (void* params, double lr, double beta1, double beta2, double eps, double weight_decay, bool amsgrad);
 IGNITE_API void _ignite_adamw_step (void* opt);
 IGNITE_API void _ignite_adamw_zero_grad (void* opt);
-IGNITE_API void* _ignite_adagrad (void* params, double lr, double lr_decay, double weight_decay, double initial_accumulator_value, double eps);
-IGNITE_API void _ignite_adagrad_step (void* opt);
-IGNITE_API void _ignite_adagrad_zero_grad (void* opt);
-IGNITE_API void* _ignite_rmsprop (void* params, double lr, double alpha, double eps, double weight_decay, double momentum, bool centered);
-IGNITE_API void _ignite_rmsprop_step (void* opt);
-IGNITE_API void _ignite_rmsprop_zero_grad (void* opt);
+IGNITE_API void _delete_optim (void* x);
 IGNITE_API void _delete_optim_sgd (void* x);
 IGNITE_API void _delete_optim_adam (void* x);
 IGNITE_API void _delete_optim_adamw (void* x);
@@ -57,41 +48,49 @@ IGNITE_API void _delete_optim_adagrad (void* x);
 IGNITE_API void _delete_optim_rmsprop (void* x);
 IGNITE_API void _delete_optim_param_groups (void* x);
 IGNITE_API void _delete_optim_param_group (void* x);
-IGNITE_API void _delete_sgd_param_groups (void* x);
-IGNITE_API void _delete_sgd_param_group (void* x);
 IGNITE_API void _delete_adamw_param_groups (void* x);
 IGNITE_API void _delete_adamw_param_group (void* x);
 IGNITE_API void _delete_adamw_states (void* x);
 IGNITE_API void _delete_adamw_state (void* x);
 
 #ifdef RCPP_VERSION
-inline void* ignite_sgd_get_param_groups (void* opt) {
-  auto ret =  _ignite_sgd_get_param_groups(opt);
+inline void* ignite_adamw_get_param_groups (void* groups) {
+  auto ret =  _ignite_adamw_get_param_groups(groups);
   host_exception_handler();
   return ret;
 }
-inline void ignite_sgd_set_param_groups (void* opt, void* param_groups) {
-   _ignite_sgd_set_param_groups(opt, param_groups);
-  host_exception_handler();
-  
-}
-inline void* ignite_adamw_get_param_groups (void* opt) {
-  auto ret =  _ignite_adamw_get_param_groups(opt);
+inline void* ignite_optim_get_param_group_params (void* group) {
+  auto ret =  _ignite_optim_get_param_group_params(group);
   host_exception_handler();
   return ret;
 }
-inline void ignite_adamw_set_param_groups (void* opt, void* param_groups) {
-   _ignite_adamw_set_param_groups(opt, param_groups);
+inline double ignite_optim_get_param_group_lr (void* group) {
+  auto ret =  _ignite_optim_get_param_group_lr(group);
   host_exception_handler();
-  
+  return ret;
 }
-inline void* ignite_adamw_states (void* opt) {
-  auto ret =  _ignite_adamw_states(opt);
+inline void* ignite_adamw_get_states (void* opt) {
+  auto ret =  _ignite_adamw_get_states(opt);
   host_exception_handler();
   return ret;
 }
 inline void* adamw_state_exp_avg (void* state) {
   auto ret =  _adamw_state_exp_avg(state);
+  host_exception_handler();
+  return ret;
+}
+inline void* adamw_state_exp_avg_sq (void* state) {
+  auto ret =  _adamw_state_exp_avg_sq(state);
+  host_exception_handler();
+  return ret;
+}
+inline void* adamw_state_max_exp_avg_sq (void* state) {
+  auto ret =  _adamw_state_max_exp_avg_sq(state);
+  host_exception_handler();
+  return ret;
+}
+inline void* adamw_state_step (void* state) {
+  auto ret =  _adamw_state_step(state);
   host_exception_handler();
   return ret;
 }
@@ -105,38 +104,8 @@ inline void* ignite_predict_step (void* network, void* input) {
   host_exception_handler();
   return ret;
 }
-inline void* ignite_sgd (void* params, double lr, double momentum, double dampening, double weight_decay, bool nesterov) {
-  auto ret =  _ignite_sgd(params, lr, momentum, dampening, weight_decay, nesterov);
-  host_exception_handler();
-  return ret;
-}
-inline void ignite_sgd_step (void* opt) {
-   _ignite_sgd_step(opt);
-  host_exception_handler();
-  
-}
-inline void ignite_sgd_zero_grad (void* opt) {
-   _ignite_sgd_zero_grad(opt);
-  host_exception_handler();
-  
-}
-inline void* ignite_adam (void* params, double lr, double beta1, double beta2, double eps, double weight_decay, bool amsgrad) {
-  auto ret =  _ignite_adam(params, lr, beta1, beta2, eps, weight_decay, amsgrad);
-  host_exception_handler();
-  return ret;
-}
-inline void ignite_adam_step (void* opt) {
-   _ignite_adam_step(opt);
-  host_exception_handler();
-  
-}
-inline void ignite_adam_zero_grad (void* opt) {
-   _ignite_adam_zero_grad(opt);
-  host_exception_handler();
-  
-}
-inline void* ignite_adamw (void* groups) {
-  auto ret =  _ignite_adamw(groups);
+inline void* ignite_adamw (void* params, double lr, double beta1, double beta2, double eps, double weight_decay, bool amsgrad) {
+  auto ret =  _ignite_adamw(params, lr, beta1, beta2, eps, weight_decay, amsgrad);
   host_exception_handler();
   return ret;
 }
@@ -150,33 +119,8 @@ inline void ignite_adamw_zero_grad (void* opt) {
   host_exception_handler();
   
 }
-inline void* ignite_adagrad (void* params, double lr, double lr_decay, double weight_decay, double initial_accumulator_value, double eps) {
-  auto ret =  _ignite_adagrad(params, lr, lr_decay, weight_decay, initial_accumulator_value, eps);
-  host_exception_handler();
-  return ret;
-}
-inline void ignite_adagrad_step (void* opt) {
-   _ignite_adagrad_step(opt);
-  host_exception_handler();
-  
-}
-inline void ignite_adagrad_zero_grad (void* opt) {
-   _ignite_adagrad_zero_grad(opt);
-  host_exception_handler();
-  
-}
-inline void* ignite_rmsprop (void* params, double lr, double alpha, double eps, double weight_decay, double momentum, bool centered) {
-  auto ret =  _ignite_rmsprop(params, lr, alpha, eps, weight_decay, momentum, centered);
-  host_exception_handler();
-  return ret;
-}
-inline void ignite_rmsprop_step (void* opt) {
-   _ignite_rmsprop_step(opt);
-  host_exception_handler();
-  
-}
-inline void ignite_rmsprop_zero_grad (void* opt) {
-   _ignite_rmsprop_zero_grad(opt);
+inline void delete_optim (void* x) {
+   _delete_optim(x);
   host_exception_handler();
   
 }
@@ -212,16 +156,6 @@ inline void delete_optim_param_groups (void* x) {
 }
 inline void delete_optim_param_group (void* x) {
    _delete_optim_param_group(x);
-  host_exception_handler();
-  
-}
-inline void delete_sgd_param_groups (void* x) {
-   _delete_sgd_param_groups(x);
-  host_exception_handler();
-  
-}
-inline void delete_sgd_param_group (void* x) {
-   _delete_sgd_param_group(x);
   host_exception_handler();
   
 }

@@ -5,6 +5,8 @@
         "*.rmd": "rmd",
         "vector": "cpp",
         "locale": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "__split_buffer": "cpp",
+        "string": "cpp"
     }
 }
