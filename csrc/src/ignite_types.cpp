@@ -2,6 +2,20 @@
 #include "ignite/ignite_types.h"
 #include <lantern/types.h>
 
+
+// When making a raw pointer we distinguish two cases:
+// 1. The object x is managing its own memory.
+//    The cases for this are:
+//    - The optimizer, which are heap-allocated by the ignite functions in ignite.cpp
+//    - A shared pointer (such as a torch::Tensor) is returned
+//    - A custom heap-allocated object is returned (e.g. the adamw_options)
+// 2. The object x is not managing its own memory.
+//    This is needed for things like the param groups or optimizer options where x is only
+//    a pointer and the memory is managed by the optimizer.
+//    We never directly return such objects to R but only use it to communicate it to Rcpp.
+//    For those, we also must not register the destructor on the Rcpp side as this might
+//    otherwise free the memory twice.
+
 namespace make_raw {
 
 void* Optim(const optim& x) {
@@ -32,10 +46,10 @@ void* OptimParamGroups(const optim_param_groups& x) {
     return make_ptr<optim_param_groups>(x);
 }
 void* OptimParamGroup(const optim_param_group& x) {
-    return make_ptr<optim_param_group>(x);
+    return x;
 }
 void* AdamWParamGroup(const adamw_param_group& x) {
-    return make_ptr<adamw_param_group>(x);
+    return x;
 }
 void* AdamWParamGroups(const adamw_param_groups& x) {
     // TODO: I think we need to access the groups here
@@ -45,7 +59,16 @@ void* AdamWStates(const adamw_states& x) {
     return make_ptr<adamw_states>(x);
 }
 void* AdamWState(const adamw_state& x) {
-    return make_ptr<adamw_state>(x);
+    return x;
+}
+void* AdamWOptions(const adamw_options& x) {
+    return make_ptr<adamw_options>(x);
+}
+void* OptimOptions(const optim_options& x) {
+    return x;
+}
+void* StringVector(const string_vector& x) {
+    return make_ptr<string_vector>(x);
 }
 }
 
@@ -86,7 +109,18 @@ adamw_states AdamWStates(void* x) {
 adamw_state AdamWState(void* x) {
     return *reinterpret_cast<adamw_state*>(x);
 }
+adamw_options AdamWOptions(void* x) {
+    return *reinterpret_cast<adamw_options*>(x);
 }
+optim_options OptimOptions(void* x) {
+    return *reinterpret_cast<optim_options*>(x);
+}
+string_vector StringVector(void* x) {
+    return *reinterpret_cast<string_vector*>(x);
+}
+}
+
+// TODO: Remove the deleters that are not needed
 
 // [[torch::export]]
 void delete_optim(void* x) {
@@ -137,4 +171,9 @@ void delete_adamw_states(void* x) {
 // [[torch::export]]
 void delete_adamw_state(void* x) {
   delete reinterpret_cast<adamw_state>(x);
+}
+
+// [[torch::export]]
+void delete_adamw_options(void* x) {
+  delete reinterpret_cast<adamw_options*>(x);
 }

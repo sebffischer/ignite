@@ -12,12 +12,20 @@ torch::TensorList rcpp_ignite_optim_get_param_group_params (ignite::optim_param_
   return  ignite_optim_get_param_group_params(group.get());
 }
 // [[Rcpp::export]]
-double rcpp_ignite_optim_get_param_group_lr (ignite::optim_param_group group) {
-  return  ignite_optim_get_param_group_lr(group.get());
+ignite::adamw_options rcpp_ignite_adamw_get_param_group_options (ignite::optim_param_group group) {
+  return  ignite_adamw_get_param_group_options(group.get());
+}
+// [[Rcpp::export]]
+void rcpp_ignite_adamw_set_param_group_options (ignite::optim_adamw opt, int i, ignite::adamw_options options) {
+   ignite_adamw_set_param_group_options(opt.get(), i, options.get());
 }
 // [[Rcpp::export]]
 ignite::adamw_states rcpp_ignite_adamw_get_states (ignite::optim_adamw opt) {
   return  ignite_adamw_get_states(opt.get());
+}
+// [[Rcpp::export]]
+torch::TensorList rcpp_ignite_adamw_get_state (ignite::adamw_state state) {
+  return  ignite_adamw_get_state(state.get());
 }
 // [[Rcpp::export]]
 torch::Tensor rcpp_adamw_state_exp_avg (ignite::adamw_state state) {
@@ -102,4 +110,8 @@ void rcpp_delete_adamw_states (void* x) {
 // [[Rcpp::export]]
 void rcpp_delete_adamw_state (void* x) {
    delete_adamw_state(x);
+}
+// [[Rcpp::export]]
+void rcpp_delete_adamw_options (void* x) {
+   delete_adamw_options(x);
 }

@@ -33,15 +33,27 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpp_ignite_optim_get_param_group_lr
-double rcpp_ignite_optim_get_param_group_lr(ignite::optim_param_group group);
-RcppExport SEXP _ignite_rcpp_ignite_optim_get_param_group_lr(SEXP groupSEXP) {
+// rcpp_ignite_adamw_get_param_group_options
+ignite::adamw_options rcpp_ignite_adamw_get_param_group_options(ignite::optim_param_group group);
+RcppExport SEXP _ignite_rcpp_ignite_adamw_get_param_group_options(SEXP groupSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< ignite::optim_param_group >::type group(groupSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpp_ignite_optim_get_param_group_lr(group));
+    rcpp_result_gen = Rcpp::wrap(rcpp_ignite_adamw_get_param_group_options(group));
     return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_ignite_adamw_set_param_group_options
+void rcpp_ignite_adamw_set_param_group_options(ignite::optim_adamw opt, int i, ignite::adamw_options options);
+RcppExport SEXP _ignite_rcpp_ignite_adamw_set_param_group_options(SEXP optSEXP, SEXP iSEXP, SEXP optionsSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< ignite::optim_adamw >::type opt(optSEXP);
+    Rcpp::traits::input_parameter< int >::type i(iSEXP);
+    Rcpp::traits::input_parameter< ignite::adamw_options >::type options(optionsSEXP);
+    rcpp_ignite_adamw_set_param_group_options(opt, i, options);
+    return R_NilValue;
 END_RCPP
 }
 // rcpp_ignite_adamw_get_states
@@ -52,6 +64,17 @@ BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< ignite::optim_adamw >::type opt(optSEXP);
     rcpp_result_gen = Rcpp::wrap(rcpp_ignite_adamw_get_states(opt));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_ignite_adamw_get_state
+torch::TensorList rcpp_ignite_adamw_get_state(ignite::adamw_state state);
+RcppExport SEXP _ignite_rcpp_ignite_adamw_get_state(SEXP stateSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< ignite::adamw_state >::type state(stateSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_ignite_adamw_get_state(state));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -283,6 +306,16 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// rcpp_delete_adamw_options
+void rcpp_delete_adamw_options(void* x);
+RcppExport SEXP _ignite_rcpp_delete_adamw_options(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< void* >::type x(xSEXP);
+    rcpp_delete_adamw_options(x);
+    return R_NilValue;
+END_RCPP
+}
 // ignite_raise_exception
 void ignite_raise_exception();
 RcppExport SEXP _ignite_ignite_raise_exception() {
@@ -296,8 +329,10 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_ignite_rcpp_ignite_adamw_get_param_groups", (DL_FUNC) &_ignite_rcpp_ignite_adamw_get_param_groups, 1},
     {"_ignite_rcpp_ignite_optim_get_param_group_params", (DL_FUNC) &_ignite_rcpp_ignite_optim_get_param_group_params, 1},
-    {"_ignite_rcpp_ignite_optim_get_param_group_lr", (DL_FUNC) &_ignite_rcpp_ignite_optim_get_param_group_lr, 1},
+    {"_ignite_rcpp_ignite_adamw_get_param_group_options", (DL_FUNC) &_ignite_rcpp_ignite_adamw_get_param_group_options, 1},
+    {"_ignite_rcpp_ignite_adamw_set_param_group_options", (DL_FUNC) &_ignite_rcpp_ignite_adamw_set_param_group_options, 3},
     {"_ignite_rcpp_ignite_adamw_get_states", (DL_FUNC) &_ignite_rcpp_ignite_adamw_get_states, 1},
+    {"_ignite_rcpp_ignite_adamw_get_state", (DL_FUNC) &_ignite_rcpp_ignite_adamw_get_state, 1},
     {"_ignite_rcpp_adamw_state_exp_avg", (DL_FUNC) &_ignite_rcpp_adamw_state_exp_avg, 1},
     {"_ignite_rcpp_adamw_state_exp_avg_sq", (DL_FUNC) &_ignite_rcpp_adamw_state_exp_avg_sq, 1},
     {"_ignite_rcpp_adamw_state_max_exp_avg_sq", (DL_FUNC) &_ignite_rcpp_adamw_state_max_exp_avg_sq, 1},
@@ -319,6 +354,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_ignite_rcpp_delete_adamw_param_group", (DL_FUNC) &_ignite_rcpp_delete_adamw_param_group, 1},
     {"_ignite_rcpp_delete_adamw_states", (DL_FUNC) &_ignite_rcpp_delete_adamw_states, 1},
     {"_ignite_rcpp_delete_adamw_state", (DL_FUNC) &_ignite_rcpp_delete_adamw_state, 1},
+    {"_ignite_rcpp_delete_adamw_options", (DL_FUNC) &_ignite_rcpp_delete_adamw_options, 1},
     {"_ignite_ignite_raise_exception", (DL_FUNC) &_ignite_ignite_raise_exception, 0},
     {NULL, NULL, 0}
 };

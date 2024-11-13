@@ -20,17 +20,38 @@ adamw_param_groups::operator SEXP () const {
   std::cout << "before" << std::endl;
   // TODO(IMPORTANT): This is actually a struct with a single field which is this vector.
   // C++ does not guarantee the same layout of a type and a struct with one field to this type
-  auto v = static_cast<std::vector<void*>*>(ptr.get());
+
+  // TODa(DANIEL): We need to take care of deleting these options at the end
+  auto v = reinterpret_cast<std::vector<void*>*>(ptr.get());
 
   std::cout << "after" << std::endl;
 
   // iterate over the pointers and call into rcpp_adamw_param_group for each
   Rcpp::List lst = Rcpp::List::create();
+  // TODO(DANIEL): This will not work on windows, but we can keep it for now.
   for (auto* ptr : *v) {
     Rcpp::List lst_inner = Rcpp::List::create();
     lst_inner["params"] = rcpp_ignite_optim_get_param_group_params(&ptr);
-    lst_inner["lr"] = rcpp_ignite_optim_get_param_group_lr(&ptr);
 
+    auto options = rcpp_ignite_adamw_get_param_group_options(&ptr);
+
+    // now cast the optinos to adamw_options::adamw_options_inner
+    // static cast is ok here as we know the type
+
+    // TODO(IMPORTANT): We are now the owner of the heap allocated options and need to make sure to
+    // delete it.
+    // otherwise we have a memory leak
+    auto options_inner = *reinterpret_cast<adamw_options::adamw_options_inner*>(options.get());
+
+    // TODO: Maybe put this into the adam_options -> SEXP conversion
+    lst_inner["lr"] = options_inner.lr;
+    lst_inner["weight_decay"] = options_inner.weight_decay;
+    // make a vector from the tuple
+    lst_inner["betas"] = Rcpp::NumericVector::create(std::get<0>(options_inner.betas), std::get<1>(options_inner.betas));
+    lst_inner["eps"] = options_inner.eps;
+    lst_inner["amsgrad"] = options_inner.amsgrad;
+
+    delete options_inner;
 
     lst.push_back(lst_inner);
   }
@@ -56,6 +77,7 @@ adamw_state::operator SEXP () const {
 adamw_state::adamw_state(SEXP x) {
 }
 
+// TODO: Is this correct? the memory of the state is managed by the optimizer (I think)
 adamw_state::adamw_state (void* x) : ptr(x, [](void*) {}) {};
 
 
@@ -82,12 +104,7 @@ adamw_states::operator SEXP () const {
   // walk over the pointers and call adamw_state_exp_avg on each
   Rcpp::List lst = Rcpp::List::create();
   for (auto* state : *void_ptr) {
-    Rcpp::List lst_inner = Rcpp::List::create();
-    lst_inner.push_back(rcpp_adamw_state_exp_avg(&state));
-    lst_inner.push_back(rcpp_adamw_state_exp_avg_sq(&state));
-    lst_inner.push_back(rcpp_adamw_state_max_exp_avg_sq(&state));
-    lst_inner.push_back(rcpp_adamw_state_step(&state));
-
+    Rcpp::List lst_inner = Rcpp::as<Rcpp::List>(rcpp_ignite_adamw_get_state(&state));
     lst_inner.names() = Rcpp::CharacterVector::create("exp_avg", "exp_avg_sq", "max_exp_avg_sq", "step");
     lst.push_back(lst_inner);
   }
@@ -122,6 +139,9 @@ optim_param_group::operator SEXP () const {
   return xptr;
 }
 optim_param_group::optim_param_group (SEXP x) : optim_param_group{Rcpp::as<Rcpp::XPtr<optim_param_group>>(x)->ptr} {}
+// because this is only a pointer I think we don't need to delete it.
+
+// TODO: Is this correct? the memory of the param_group is managed by the optimizer (I think)
 optim_param_group::optim_param_group (void* x) : ptr(x, [](void*) {}) {};
 
 void* optim::get() {
@@ -138,6 +158,11 @@ optim::operator SEXP () const {
 optim::optim (SEXP x) : optim{Rcpp::as<Rcpp::XPtr<optim>>(x)->ptr} {}
 optim::optim (void* x) : ptr(x, rcpp_delete_optim) {};
 
+void* optim_options::get() {
+  return ptr;
+}
+
+
 void* optim_adamw::get() {
   return ptr.get();
 }
@@ -148,5 +173,26 @@ optim_adamw::operator SEXP () const {
 }
 optim_adamw::optim_adamw (SEXP x) : optim_adamw{Rcpp::as<Rcpp::XPtr<optim_adamw>>(x)->ptr} {}
 optim_adamw::optim_adamw (void* x) : ptr(x, rcpp_delete_optim_adamw) {};
+
+void* adamw_options::get() {
+  // cast to void*
+  return static_cast<void*>(ptr.get());
+}
+adamw_options::operator SEXP () const {
+  return R_NilValue;
+  //Rcpp::List lst = Rcpp::List::create();
+  //auto x = get();
+  //lst["lr"] = x->lr;
+  //lst["weight_decay"] = x->weight_decay;
+  //lst["betas"] = x->betas;
+  //lst["eps"] = x->eps;
+  //lst["amsgrad"] = x->amsgrad;
+  //return lst;
+}
+adamw_options::adamw_options (void* x) : ptr(x, rcpp_delete_adamw_options) {};
+adamw_options::adamw_options (SEXP x) {
+  // TODO: We need to implement this for setting the param group options
+}
+
 }
 

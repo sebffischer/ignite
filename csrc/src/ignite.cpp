@@ -35,6 +35,11 @@ adamw_param_groups ignite_adamw_get_param_groups(optim_adamw groups) {
   return param_groups;
 }
 
+// [[torch::export]]
+int ignite_adamw_param_groups_size(optim_adamw opt) {
+  return opt->param_groups().size();
+}
+
 // [[torch::export(register_types=c("optim_param_group", "OptimParamGroup", "void*", "ignite::optim_param_group"))]]
 std::vector<torch::Tensor> ignite_optim_get_param_group_params(optim_param_group group) {
   auto pars = group->params();
@@ -44,10 +49,25 @@ std::vector<torch::Tensor> ignite_optim_get_param_group_params(optim_param_group
   return pars;
 }
 
-// [[torch::export]]
-double ignite_optim_get_param_group_lr(optim_param_group group) {
-  return group->options().get_lr();
+// [[torch::export(register_types=list(c("adamw_options", "AdamWOptions", "void*", "ignite::adamw_options")))]]
+adamw_options ignite_adamw_get_param_group_options(optim_param_group group) {
+  auto& x  = static_cast<torch::optim::AdamWOptions&>(group->options());
+  return adamw_options{x.lr(), x.weight_decay(), x.betas(), x.eps(), x.amsgrad()};
 }
+
+// [[torch::export]]
+void ignite_adamw_set_param_group_options(optim_adamw opt, int i, adamw_options options) {
+  // get the i-th param group and set it
+  auto& param_group = (opt->param_groups())[i];
+
+  auto& x = static_cast<torch::optim::AdamWOptions&>(param_group.options());
+  x.lr(options.lr);
+  x.weight_decay(options.weight_decay);
+  x.betas(options.betas);
+  x.eps(options.eps);
+  x.amsgrad(options.amsgrad);
+}
+
 
 //sgd_param_groups ignite_sgd_get_param_groups(optim_sgd opt) {
 //  // iterate over the param groups and call ignite_sgd_get_param_group for each one and push the results into a vector
@@ -65,7 +85,7 @@ double ignite_optim_get_param_group_lr(optim_param_group group) {
 //
 //  // zip the param_groups and opt->param_groups by iterating over the indices
 //  for (size_t i = 0; i < opt->param_groups().size(); ++i) {
-//    auto& opt_group = opt->param_groups()[i];
+//    auto& opt_group = opt->param_groups()[g];
 //    auto& param_group = param_groups[i];
 //    // TODO check that the params all point to the same tensors
 //    opt_group.set_options(std::make_unique<torch::optim::SGDOptions>(param_group.to_sgd_options()));
@@ -86,53 +106,67 @@ double ignite_optim_get_param_group_lr(optim_param_group group) {
 
 // [[torch::export(register_types=list(c("adamw_states", "AdamWStates", "void*", "ignite::adamw_states"), c("adamw_state", "AdamWState", "void*", "ignite::adamw_state")))]]
 adamw_states ignite_adamw_get_states(optim_adamw opt) {
-  // TODO: Maybe rename to ignite_get_adamw_states
-
-  // we need to pay attention to the ordering here
-  // iterating over an ska::flat_hash_map does not preserve the order
   adamw_states states;
-  for (const auto& [key, value] : opt->state()) {
-    std::cout << "adamw_states: key" << key << std::endl;
-    auto* s = static_cast<torch::optim::AdamWParamState*>(value.get());
-    // print the dimension of the exp_avg tensor
-    std::cout << "dimension of the exp_avg tensor: " << s->exp_avg().dim() << std::endl;
-    states.push_back(s);
+
+  // Collect keys in the order of param groups
+  for (const auto& group : opt->param_groups()) {
+    for (const auto& param : group.params()) {
+      auto key = c10::guts::to_string(param.unsafeGetTensorImpl());
+      auto state_it = opt->state().find(key);
+      // TODO: Check whether this actually does what we want
+      if (state_it != opt->state().end()) {
+        auto* adamw_state = static_cast<torch::optim::AdamWParamState*>(state_it->second.get());
+        states.push_back(adamw_state);
+      } else {
+        // runtime error
+        throw std::runtime_error("State not found");
+      }
+    }
   }
+
   return states;
 }
 
-//void ignite_adamw_set_states(optim_adamw opt, adamw_states states) {
-//  auto opt_states = opt->state();
-//  // check that lengths are the same
-//  if (opt_states.size() != states.size()) {
-//    throw std::runtime_error("State lengths are different");
-//  }
-//
-//  // iterate over the indices
-//  for (size_t i = 0; i < opt_states.size(); ++i) {
-//    // cast the opt state to a AdamWParamState
-//    auto* state = static_cast<torch::optim::AdamWParamState*>(opt_states[i].get());
-//    // cast the opt state to a AdamWParamState
-//    state->exp_avg(state)
-//
-//    opt_state = std::move(state);
-//  }
-//
-//    // we need to handle the ordering here
-//
-//  for (const auto& [key, value] : opt->state()) {
-//
-//    std::cout << "adamw_states: key" << key << std::endl;
-//    auto* s = static_cast<torch::optim::AdamWParamState*>(value.get());
-//    // print the dimension of the exp_avg tensor
-//    std::cout << "dimension of the exp_avg tensor: " << s->exp_avg().dim() << std::endl;
-//    states.push_back(s);
-//  }
-//  return states;
-//}
+void ignite_adamw_set_states(optim_adamw opt, adamw_states states) {
+  // Check that lengths are the same
+  if (opt->state().size() != states.size()) {
+    throw std::runtime_error("State lengths are different");
+  }
 
+  size_t i = 0;
+  for (const auto& group : opt->param_groups()) {
+    for (const auto& param : group.params()) {
+      auto key = c10::guts::to_string(param.unsafeGetTensorImpl());
+      auto state_it = opt->state().find(key);
+      // TODO: Check whether this actually does what we want
+      if (state_it != opt->state().end()) {
+        auto* current_state = static_cast<torch::optim::AdamWParamState*>(state_it->second.get());
+        current_state->exp_avg(states[i]->exp_avg());
+        current_state->exp_avg_sq(states[i]->exp_avg_sq());
+        current_state->max_exp_avg_sq(states[i]->max_exp_avg_sq());
+        auto step = states[i]->step();
+        // convert step from torch::kLong to int64_t
+        current_state->step(static_cast<int64_t>(step));
+      } else {
+        // runtime error
+        throw std::runtime_error("State not found");
+      }
+    }
+    ++i;
+  }
+}
 
 // FIXME: We can just return a list of tensors or a tuple?
+
+// [[torch::export]]
+std::vector<torch::Tensor> ignite_adamw_get_state(adamw_state state) {
+  auto exp_avg   = state->exp_avg();
+  auto exp_avg_sq = state->exp_avg_sq();
+  auto max_exp_avg_sq = state->max_exp_avg_sq();
+  auto step = torch::scalar_tensor(state->step(), torch::kLong);
+
+  return {exp_avg, exp_avg_sq, max_exp_avg_sq, step};
+}
 
 // [[torch::export]]
 torch::Tensor adamw_state_exp_avg(adamw_state state) {

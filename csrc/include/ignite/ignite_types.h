@@ -14,6 +14,7 @@ using torch_stack = torch::jit::Stack*;
 // it is a vector so on the Rcpp side we can cast it to a std::vector<void*> and iterate over it.
 using adamw_state = torch::optim::AdamWParamState*;
 using adamw_states = std::vector<adamw_state>;
+using string_vector = std::vector<std::string>;
 
 // To implement param_groups for the R optimizer, we work with OptimizerParamGroup,
 // which gives direct access to the parameters.
@@ -21,6 +22,7 @@ using adamw_states = std::vector<adamw_state>;
 
 using optim_param_group = torch::optim::OptimizerParamGroup*;
 using optim_param_groups = std::vector<optim_param_group>;
+using optim_options = torch::optim::OptimizerOptions*;
 
 // even though all optimizers store their param groups in a std::vector<torch::optim::OptimizerParamGroup*>,
 // we need different types for the different optimizers because we need to know from the type
@@ -30,6 +32,15 @@ struct adamw_param_groups {
     optim_param_groups groups;
 };
 
+struct adamw_options {
+    double lr;
+    double weight_decay;
+    std::tuple<double, double> betas;
+    double eps;
+    bool amsgrad;
+};
+
+// TODO: This is wrong
 using adamw_param_group = torch::optim::AdamWOptions*;
 
 namespace make_raw {
@@ -46,6 +57,9 @@ namespace make_raw {
     void* AdamWParamGroups(const adamw_param_groups& x);
     void* AdamWStates(const adamw_states& x);
     void* AdamWState(const adamw_state& x);
+    void* AdamWOptions(const adamw_options& x);
+    void* OptimOptions(const optim_options& x);
+    void* StringVector(const string_vector& x);
 }
 
 namespace from_raw {
@@ -63,4 +77,7 @@ namespace from_raw {
     adamw_param_group AdamWParamGroup(void* x);
     adamw_states AdamWStates(void* x);
     adamw_state AdamWState(void* x);
+    adamw_options AdamWOptions(void* x);
+    optim_options OptimOptions(void* x);
+    string_vector StringVector(void* x);
 }

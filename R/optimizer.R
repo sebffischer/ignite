@@ -114,14 +114,18 @@ optim_ignite_adamw <- optimizer_ignite(
     # Therefore, we unlist all the parameters and store the indices in the state dict.
     param_groups = self$param_groups
     parameters <- unlist(lapply(param_groups, function(x) x$params))
-    parameters <- sapply(parameters, torch:::xptr_address)
-
+    addresses <- sapply(unlist(lapply(param_groups, function(x) x$params)), torch:::xptr_address)
 
     param_groups = lapply(param_groups, function(group) {
       group_param <- sapply(group$params, torch:::xptr_address)
-      group$params <- match(group_param, parameters)
+      group$params <- match(group_param, addresses)
       group
     })
+
+    # TODO: (IMPORTANT): Ensure that states are in the order of the parameters,
+    # we need to pass the addresses of the external pointers to the C++ Code
+
+
 
     list(
       param_groups = param_groups,
@@ -129,15 +133,9 @@ optim_ignite_adamw <- optimizer_ignite(
     )
   },
   load_state_dict = function(state_dict) {
-    #if (!length(self$param_groups) == length(state_dict$param_groups)) {
-    #  torch:::value_error("Loaded state dict has a different number of parameter groups")
-    #}
-    #for (i in seq_along(self$param_groups)) {
-    #  if (!length(self$param_groups[[i]]$params) == length(state_dict$param_groups[[i]]$params)) {
-    #    torch:::value_error("Loaded state dict has contains a parameter group that doesn't match the size of optimizers group.")
-    #  }
-    #}
-    rcpp_ignite_set_adamw_states(self$ptr, state_dict)
+    self$param_groups = state_dict$param_groups
+    rcpp_ignite_adamw_set_states(self$ptr, state_dict$states)
+    invisible(self)
   },
   step = function() {
     rcpp_ignite_adamw_step(self$ptr)
@@ -149,7 +147,10 @@ optim_ignite_adamw <- optimizer_ignite(
     # TODO: Add the params as an integer vector.
     param_groups = function(rhs) {
       if (!missing(rhs)) {
-        rcpp_ignite_sgd_set_param_groups(self$get_ptr(), rhs)
+        for (i in seq_along(rhs)) {
+          # TODO: Checks that parameters are identical + other checks
+          rcpp_ignite_adamw_set_param_group_options(self$get_ptr(), i, rhs[[i]])
+        }
       }
       rcpp_ignite_adamw_get_param_groups(self$get_ptr())
     }

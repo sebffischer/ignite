@@ -5,8 +5,10 @@
 
 ignite::adamw_param_groups rcpp_ignite_adamw_get_param_groups (ignite::optim_adamw groups);
 torch::TensorList rcpp_ignite_optim_get_param_group_params (ignite::optim_param_group group);
-double rcpp_ignite_optim_get_param_group_lr (ignite::optim_param_group group);
+ignite::adamw_options rcpp_ignite_adamw_get_param_group_options (ignite::optim_param_group group);
+void rcpp_ignite_adamw_set_param_group_options (ignite::optim_adamw opt, int i, ignite::adamw_options options);
 ignite::adamw_states rcpp_ignite_adamw_get_states (ignite::optim_adamw opt);
+torch::TensorList rcpp_ignite_adamw_get_state (ignite::adamw_state state);
 torch::Tensor rcpp_adamw_state_exp_avg (ignite::adamw_state state);
 torch::Tensor rcpp_adamw_state_exp_avg_sq (ignite::adamw_state state);
 torch::Tensor rcpp_adamw_state_max_exp_avg_sq (ignite::adamw_state state);
@@ -28,3 +30,4 @@ void rcpp_delete_adamw_param_groups (void* x);
 void rcpp_delete_adamw_param_group (void* x);
 void rcpp_delete_adamw_states (void* x);
 void rcpp_delete_adamw_state (void* x);
+void rcpp_delete_adamw_options (void* x);

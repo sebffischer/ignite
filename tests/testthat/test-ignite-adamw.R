@@ -1,9 +1,9 @@
 make_adamw = function(...) {
-  n = torch::nn_linear(1, 1, bias = F)
+  n = torch::nn_linear(1, 1)
 
   n$parameters[[1]]
 
-  o = optim_ignite_adamw(n$parameters)
+  o = optim_ignite_adamw(n$parameters, ...)
 
   s = function() {
     x = torch_randn(10, 1)
@@ -29,15 +29,23 @@ test_that("constructor arguments are passed to the optimizer", {
   n = nn_linear(1, 1)
   lr = 0.123
   weight_decay = 0.456
-  betas = c(0.789, 0.123)
+  betas = c(0.789, 0.444)
   eps = 0.01
   amsgrad = sample(c(TRUE, FALSE), 1)
-  o = make_adamw()
+  o = make_adamw(lr = lr, weight_decay = weight_decay, betas = betas, eps = eps, amsgrad = amsgrad)
   x = o$state_dict()
+  x
+  x$param_groups[[1]]$lr = 0.2
+  expect_equal(x$param_groups[[1]]$lr, 0.2)
+
   # TODO: Test that no segfaults
+  # test that state_dict()$param_groups[[1]]$params is a vector of ints
+  # and that they cover the whole sequence of the 1:n
   # test that step is a long
   # test that the order is preserved
   # test that we can also set the state
+  # test that amsgrad is defined it it is TRUE
+
   o$state_dict2()
   expect_equal()
   gc(); gc()

@@ -9,12 +9,20 @@ rcpp_ignite_optim_get_param_group_params <- function(group) {
     .Call('_ignite_rcpp_ignite_optim_get_param_group_params', PACKAGE = 'ignite', group)
 }
 
-rcpp_ignite_optim_get_param_group_lr <- function(group) {
-    .Call('_ignite_rcpp_ignite_optim_get_param_group_lr', PACKAGE = 'ignite', group)
+rcpp_ignite_adamw_get_param_group_options <- function(group) {
+    .Call('_ignite_rcpp_ignite_adamw_get_param_group_options', PACKAGE = 'ignite', group)
+}
+
+rcpp_ignite_adamw_set_param_group_options <- function(opt, i, options) {
+    invisible(.Call('_ignite_rcpp_ignite_adamw_set_param_group_options', PACKAGE = 'ignite', opt, i, options))
 }
 
 rcpp_ignite_adamw_get_states <- function(opt) {
     .Call('_ignite_rcpp_ignite_adamw_get_states', PACKAGE = 'ignite', opt)
+}
+
+rcpp_ignite_adamw_get_state <- function(state) {
+    .Call('_ignite_rcpp_ignite_adamw_get_state', PACKAGE = 'ignite', state)
 }
 
 rcpp_adamw_state_exp_avg <- function(state) {
@@ -99,6 +107,10 @@ rcpp_delete_adamw_states <- function(x) {
 
 rcpp_delete_adamw_state <- function(x) {
     invisible(.Call('_ignite_rcpp_delete_adamw_state', PACKAGE = 'ignite', x))
+}
+
+rcpp_delete_adamw_options <- function(x) {
+    invisible(.Call('_ignite_rcpp_delete_adamw_options', PACKAGE = 'ignite', x))
 }
 
 ignite_raise_exception <- function() {

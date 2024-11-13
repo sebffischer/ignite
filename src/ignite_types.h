@@ -126,11 +126,38 @@ class adamw_states {
 public:
   std::shared_ptr<void> ptr;
   adamw_states (void* x);
-  adamw_states (std::shared_ptr<void> x) : ptr(x) {}
+  adamw_states (std::shared_ptr<void> x) : ptr(x) {};
   adamw_states (SEXP x);
   operator SEXP () const;
   void* get ();
 };
 
+
+class optim_options {
+public:
+  void* ptr;
+  optim_options (void* x) : ptr(x) {};
+  void* get ();
+};
+
+class adamw_options {
+public:
+  struct adamw_options_inner {
+    double lr;
+    double weight_decay;
+    std::tuple<double, double> betas;
+    double eps;
+    bool amsgrad;
+  };
+  std::shared_ptr<void> ptr;
+  adamw_options (void* x);
+  adamw_options (std::shared_ptr<void> x) : ptr(x) {};
+  adamw_options (SEXP x);
+  operator SEXP () const;
+  void* get ();
+};
 }
 
+
+// TODO: Remove all the functions that are not needed.
+// I think for the intermediate types that are not communicated to R we can remove some things.

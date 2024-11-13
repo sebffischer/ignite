@@ -29,8 +29,10 @@ IGNITE_API void ignite_last_error_clear();
 
 IGNITE_API void* _ignite_adamw_get_param_groups (void* groups);
 IGNITE_API void* _ignite_optim_get_param_group_params (void* group);
-IGNITE_API double _ignite_optim_get_param_group_lr (void* group);
+IGNITE_API void* _ignite_adamw_get_param_group_options (void* group);
+IGNITE_API void _ignite_adamw_set_param_group_options (void* opt, int i, void* options);
 IGNITE_API void* _ignite_adamw_get_states (void* opt);
+IGNITE_API void* _ignite_adamw_get_state (void* state);
 IGNITE_API void* _adamw_state_exp_avg (void* state);
 IGNITE_API void* _adamw_state_exp_avg_sq (void* state);
 IGNITE_API void* _adamw_state_max_exp_avg_sq (void* state);
@@ -52,6 +54,7 @@ IGNITE_API void _delete_adamw_param_groups (void* x);
 IGNITE_API void _delete_adamw_param_group (void* x);
 IGNITE_API void _delete_adamw_states (void* x);
 IGNITE_API void _delete_adamw_state (void* x);
+IGNITE_API void _delete_adamw_options (void* x);
 
 #ifdef RCPP_VERSION
 inline void* ignite_adamw_get_param_groups (void* groups) {
@@ -64,13 +67,23 @@ inline void* ignite_optim_get_param_group_params (void* group) {
   host_exception_handler();
   return ret;
 }
-inline double ignite_optim_get_param_group_lr (void* group) {
-  auto ret =  _ignite_optim_get_param_group_lr(group);
+inline void* ignite_adamw_get_param_group_options (void* group) {
+  auto ret =  _ignite_adamw_get_param_group_options(group);
   host_exception_handler();
   return ret;
 }
+inline void ignite_adamw_set_param_group_options (void* opt, int i, void* options) {
+   _ignite_adamw_set_param_group_options(opt, i, options);
+  host_exception_handler();
+  
+}
 inline void* ignite_adamw_get_states (void* opt) {
   auto ret =  _ignite_adamw_get_states(opt);
+  host_exception_handler();
+  return ret;
+}
+inline void* ignite_adamw_get_state (void* state) {
+  auto ret =  _ignite_adamw_get_state(state);
   host_exception_handler();
   return ret;
 }
@@ -176,6 +189,11 @@ inline void delete_adamw_states (void* x) {
 }
 inline void delete_adamw_state (void* x) {
    _delete_adamw_state(x);
+  host_exception_handler();
+  
+}
+inline void delete_adamw_options (void* x) {
+   _delete_adamw_options(x);
   host_exception_handler();
   
 }
