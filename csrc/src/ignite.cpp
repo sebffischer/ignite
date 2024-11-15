@@ -15,58 +15,66 @@
 
 // this is working for all optimizers
 
-optim_param_groups ignite_get_param_groups(optim opt) {
-  // this works for all optimizers.
-  // However in Rcpp -> SEXP conversion we then iterate over the void*s and call a optimizer-specific getter
-  std::vector<optim_param_group> param_groups;
-  // we convert to a vector of pointers so we can iterate over it on the Rcpp side
-  // (we know the size of void pointers)
-  for (torch::optim::OptimizerParamGroup& group : opt->param_groups()) {
-    param_groups.push_back(&group);
-  }
-
-  return param_groups;
-}
-
 // [[torch::export(register_types=c("adamw_param_groups", "AdamWParamGroups", "void*", "ignite::adamw_param_groups"))]]
 adamw_param_groups ignite_adamw_get_param_groups(optim_adamw groups) {
-  std::cout << "ignite_adamw_get_param_groups" << std::endl;
-  adamw_param_groups param_groups = { ignite_get_param_groups(groups) };
-  return param_groups;
+  // param_groups returns a reference to a vector so it's still the obligation of the optimizer
+  // to manage the memory
+  return adamw_param_groups { &groups->param_groups() };
 }
-
+//
 // [[torch::export]]
-int ignite_adamw_param_groups_size(optim_adamw opt) {
-  return opt->param_groups().size();
+int ignite_adamw_param_groups_size(optim_param_groups groups) {
+  // this is the same method for all optimizers
+  return groups->size();
 }
 
-// [[torch::export(register_types=c("optim_param_group", "OptimParamGroup", "void*", "ignite::optim_param_group"))]]
-std::vector<torch::Tensor> ignite_optim_get_param_group_params(optim_param_group group) {
-  auto pars = group->params();
-  // print dim of pars
-  std::cout << "dimension of the params: " << pars[0].dim() << std::endl;
-
-  return pars;
+// [[torch::export(register_types=list(c("optim_param_group", "OptimParamGroup", "void*", "ignite::optim_param_group"), c("optim_param_groups", "OptimParamGroups", "void*", "ignite::optim_param_groups")))]]
+std::vector<torch::Tensor> ignite_optim_get_param_group_params(optim_param_groups groups, int i) {
+  auto group = (*groups)[i];
+  return group.params();
 }
 
-// [[torch::export(register_types=list(c("adamw_options", "AdamWOptions", "void*", "ignite::adamw_options")))]]
-adamw_options ignite_adamw_get_param_group_options(optim_param_group group) {
-  auto& x  = static_cast<torch::optim::AdamWOptions&>(group->options());
-  return adamw_options{x.lr(), x.weight_decay(), x.betas(), x.eps(), x.amsgrad()};
+
+// We don't need to call this from R as it is just used on the Rcpp side
+// [[torch::export(rcpp = FALSE, register_types=list(c("adamw_options", "AdamWOptions", "adamw_options", "adamw_options")))]]
+adamw_options ignite_adamw_get_param_group_options(optim_param_groups groups, int i) {
+  auto group = (*groups)[i];
+  auto& x = static_cast<torch::optim::AdamWOptions&>(group.options());
+  auto betas = x.betas();
+  adamw_options opts;
+  opts.lr = x.lr();
+  opts.weight_decay = x.weight_decay();
+  opts.betas[0] = std::get<0>(betas);
+  opts.betas[1] = std::get<1>(betas);
+  opts.eps = x.eps();
+  opts.amsgrad = x.amsgrad();
+  return opts;
 }
 
-// [[torch::export]]
+// [[torch::export(rcpp = FALSE)]]
 void ignite_adamw_set_param_group_options(optim_adamw opt, int i, adamw_options options) {
-  // get the i-th param group and set it
-  auto& param_group = (opt->param_groups())[i];
-
-  auto& x = static_cast<torch::optim::AdamWOptions&>(param_group.options());
+  auto& group = (opt->param_groups())[i];
+  auto& options_ref = group.options();
+  auto& x = reinterpret_cast<torch::optim::AdamWOptions&>(options_ref);
   x.lr(options.lr);
   x.weight_decay(options.weight_decay);
-  x.betas(options.betas);
+  x.betas(std::make_tuple(options.betas[0], options.betas[1]));
   x.eps(options.eps);
   x.amsgrad(options.amsgrad);
+  return;
 }
+
+//void ignite_adamw_set_param_group_options(optim_adamw opt, int i, adamw_options options) {
+//  // get the i-th param group and set it
+//  auto& param_group = (opt->param_groups())[i];
+//
+//  auto& x = static_cast<torch::optim::AdamWOptions&>(param_group.options());
+//  x.lr(options.lr);
+//  x.weight_decay(options.weight_decay);
+//  x.betas(std::make_tuple(options.betas[0], options.betas[1]));
+//  x.eps(options.eps);
+//  x.amsgrad(options.amsgrad);
+//}
 
 
 //sgd_param_groups ignite_sgd_get_param_groups(optim_sgd opt) {
@@ -104,35 +112,55 @@ void ignite_adamw_set_param_group_options(optim_adamw opt, int i, adamw_options 
 //  }
 //}
 
-// [[torch::export(register_types=list(c("adamw_states", "AdamWStates", "void*", "ignite::adamw_states"), c("adamw_state", "AdamWState", "void*", "ignite::adamw_state")))]]
-adamw_states ignite_adamw_get_states(optim_adamw opt) {
-  adamw_states states;
+// [[torch::export]]
+std::vector<torch::Tensor> ignite_adamw_get_states(optim_adamw opt) {
+  // here we iterate over the param states in the order of param groups
+  // and cast those param states to the optimizer-specific type
+  // the states themselves are still owned by the optimizer itself
+  // however, the newly heap-allocated vector is owned by this function
+  // so we will have to delete it later
 
-  // Collect keys in the order of param groups
+  // Create an empty vector to store the AdamW parameter states
+
+  std::vector<torch::Tensor> tensors;
+
+  // Iterate through each parameter group in the optimizer
   for (const auto& group : opt->param_groups()) {
+    // For each parameter in the group
     for (const auto& param : group.params()) {
+      // Get a unique string key for this parameter tensor
+      // The key is created from the tensor's implementation pointer
       auto key = c10::guts::to_string(param.unsafeGetTensorImpl());
+
+      // Look up this parameter's state in the optimizer's state map
+      // The state map is a flat_hash_map that maps parameter keys to their optimizer states
       auto state_it = opt->state().find(key);
-      // TODO: Check whether this actually does what we want
+
       if (state_it != opt->state().end()) {
-        auto* adamw_state = static_cast<torch::optim::AdamWParamState*>(state_it->second.get());
-        states.push_back(adamw_state);
+        // If state exists for this parameter:
+        // 1. Get raw pointer to the OptimizerParamState from the unique_ptr
+        // 2. Cast it to AdamWParamState since we know this is an AdamW optimizer
+        // 3. Store the pointer in our states vector
+        auto base_state = state_it->second.get(); // Get raw pointer from unique_ptr
+        auto adamw_state = static_cast<torch::optim::AdamWParamState*>(base_state);
+        // we need to clone because the tensors are behind unique pointers
+        // but we want ownership
+        tensors.push_back(adamw_state->exp_avg().clone());
+        tensors.push_back(adamw_state->exp_avg_sq().clone());
+        tensors.push_back(adamw_state->max_exp_avg_sq().clone());
+        tensors.push_back(torch::scalar_tensor(adamw_state->step(), torch::kLong));
       } else {
-        // runtime error
-        throw std::runtime_error("State not found");
+        // This parameter should have state - error if not found
+        throw std::runtime_error("State not found for parameter");
       }
     }
   }
-
-  return states;
+  std::cout << "tensors size: " << tensors.size() << std::endl;
+  return tensors;
 }
 
-void ignite_adamw_set_states(optim_adamw opt, adamw_states states) {
-  // Check that lengths are the same
-  if (opt->state().size() != states.size()) {
-    throw std::runtime_error("State lengths are different");
-  }
-
+// [[torch::export]]
+void ignite_adamw_set_states(optim_adamw opt, torch::TensorList states) {
   size_t i = 0;
   for (const auto& group : opt->param_groups()) {
     for (const auto& param : group.params()) {
@@ -141,60 +169,25 @@ void ignite_adamw_set_states(optim_adamw opt, adamw_states states) {
       // TODO: Check whether this actually does what we want
       if (state_it != opt->state().end()) {
         auto* current_state = static_cast<torch::optim::AdamWParamState*>(state_it->second.get());
-        current_state->exp_avg(states[i]->exp_avg());
-        current_state->exp_avg_sq(states[i]->exp_avg_sq());
-        current_state->max_exp_avg_sq(states[i]->max_exp_avg_sq());
-        auto step = states[i]->step();
+        current_state->exp_avg(states[i]);
+        current_state->exp_avg_sq(states[i + 1]);
+        current_state->max_exp_avg_sq(states[i + 2]);
+        auto step = states[i + 3];
         // convert step from torch::kLong to int64_t
-        current_state->step(static_cast<int64_t>(step));
+        current_state->step(step.item<int64_t>());
       } else {
         // runtime error
         throw std::runtime_error("State not found");
       }
     }
-    ++i;
+    i += 4;
   }
 }
 
-// FIXME: We can just return a list of tensors or a tuple?
-
-// [[torch::export]]
-std::vector<torch::Tensor> ignite_adamw_get_state(adamw_state state) {
-  auto exp_avg   = state->exp_avg();
-  auto exp_avg_sq = state->exp_avg_sq();
-  auto max_exp_avg_sq = state->max_exp_avg_sq();
-  auto step = torch::scalar_tensor(state->step(), torch::kLong);
-
-  return {exp_avg, exp_avg_sq, max_exp_avg_sq, step};
-}
-
-// [[torch::export]]
-torch::Tensor adamw_state_exp_avg(adamw_state state) {
-  auto x = state->exp_avg();
-  return x;
-}
-// [[torch::export]]
-torch::Tensor adamw_state_exp_avg_sq(adamw_state state) {
-  auto x = state->exp_avg();
-  return x;
-}
-// [[torch::export]]
-torch::Tensor adamw_state_max_exp_avg_sq(adamw_state state) {
-  auto x = state->max_exp_avg_sq();
-  return x;
-}
-// [[torch::export]]
-torch::Tensor adamw_state_step(adamw_state state) {
-  auto step = state->step();
-  // step is a long long, but R ints are 32 bit, so we represent it as a torch tensor which allows
-  // for higher precision
-  // this is also consistent with how the R adamw returns the step
-  auto step_tensor = torch::scalar_tensor(step, torch::kLong);
-  return step_tensor;
-}
 
 // [[torch::export(register_types=list(c("script_module", "ScriptModule", "void*", "Rcpp::XPtr<XPtrTorchScriptModule>"), c("torch_stack", "TorchStack", "void*", "XPtrTorchStack"), c("optim", "Optim", "void*", "ignite::optim")))]]
-std::vector<torch::Tensor> ignite_opt_step(script_module network, script_module loss_fn, torch_stack input, torch::Tensor target, optim optimizer) {
+std::vector<torch::Tensor> ignite_opt_step(script_module network, script_module loss_fn, torch_stack input, torch::Tensor target, optim_adamw optimizer) {
+  // TODO: optim_adamw -> optim
   optimizer->zero_grad();
 
   auto out = (*network)(*input);

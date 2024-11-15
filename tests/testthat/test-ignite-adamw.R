@@ -33,9 +33,20 @@ test_that("constructor arguments are passed to the optimizer", {
   eps = 0.01
   amsgrad = sample(c(TRUE, FALSE), 1)
   o = make_adamw(lr = lr, weight_decay = weight_decay, betas = betas, eps = eps, amsgrad = amsgrad)
+  o$state_dict()
+
   x = o$state_dict()
+
+  o$load_state_dict(sd)
+
+  o$param_groups[[1]]$lr = 10
+  expect_equal(o$param_groups[[1]]$lr, 10)
+
+
+  x = o$state_dict()
+  o$load_state_dict(x)
   x
-  x$param_groups[[1]]$lr = 0.2
+  o$param_groups[[1]]$lr = 0.2
   expect_equal(x$param_groups[[1]]$lr, 0.2)
 
   # TODO: Test that no segfaults

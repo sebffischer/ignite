@@ -21,73 +21,52 @@ IGNITE_API void* _ignite_adamw_get_param_groups (void* groups) {
   } IGNITE_HANDLE_EXCEPTION
   return (void*) NULL;
 }
-std::vector<torch::Tensor> ignite_optim_get_param_group_params (optim_param_group group);
-IGNITE_API void* _ignite_optim_get_param_group_params (void* group) {
+int ignite_adamw_param_groups_size (optim_param_groups groups);
+IGNITE_API int _ignite_adamw_param_groups_size (void* groups) {
   try {
-    return  make_raw::TensorList(ignite_optim_get_param_group_params(from_raw::OptimParamGroup(group)));
+    return  (ignite_adamw_param_groups_size(from_raw::OptimParamGroups(groups)));
+  } IGNITE_HANDLE_EXCEPTION
+  return 10;
+}
+std::vector<torch::Tensor> ignite_optim_get_param_group_params (optim_param_groups groups, int i);
+IGNITE_API void* _ignite_optim_get_param_group_params (void* groups, int i) {
+  try {
+    return  make_raw::TensorList(ignite_optim_get_param_group_params(from_raw::OptimParamGroups(groups), i));
   } IGNITE_HANDLE_EXCEPTION
   return (void*) NULL;
 }
-adamw_options ignite_adamw_get_param_group_options (optim_param_group group);
-IGNITE_API void* _ignite_adamw_get_param_group_options (void* group) {
+adamw_options ignite_adamw_get_param_group_options (optim_param_groups groups, int i);
+IGNITE_API adamw_options _ignite_adamw_get_param_group_options (void* groups, int i) {
   try {
-    return  make_raw::AdamWOptions(ignite_adamw_get_param_group_options(from_raw::OptimParamGroup(group)));
+    return  make_raw::AdamWOptions(ignite_adamw_get_param_group_options(from_raw::OptimParamGroups(groups), i));
   } IGNITE_HANDLE_EXCEPTION
-  return (void*) NULL;
+  return NULL;
 }
 void ignite_adamw_set_param_group_options (optim_adamw opt, int i, adamw_options options);
-IGNITE_API void _ignite_adamw_set_param_group_options (void* opt, int i, void* options) {
+IGNITE_API void _ignite_adamw_set_param_group_options (void* opt, int i, adamw_options options) {
   try {
      (ignite_adamw_set_param_group_options(from_raw::AdamW(opt), i, from_raw::AdamWOptions(options)));
   } IGNITE_HANDLE_EXCEPTION
   
 }
-adamw_states ignite_adamw_get_states (optim_adamw opt);
+std::vector<torch::Tensor> ignite_adamw_get_states (optim_adamw opt);
 IGNITE_API void* _ignite_adamw_get_states (void* opt) {
   try {
-    return  make_raw::AdamWStates(ignite_adamw_get_states(from_raw::AdamW(opt)));
+    return  make_raw::TensorList(ignite_adamw_get_states(from_raw::AdamW(opt)));
   } IGNITE_HANDLE_EXCEPTION
   return (void*) NULL;
 }
-std::vector<torch::Tensor> ignite_adamw_get_state (adamw_state state);
-IGNITE_API void* _ignite_adamw_get_state (void* state) {
+void ignite_adamw_set_states (optim_adamw opt, torch::TensorList states);
+IGNITE_API void _ignite_adamw_set_states (void* opt, void* states) {
   try {
-    return  make_raw::TensorList(ignite_adamw_get_state(from_raw::AdamWState(state)));
+     (ignite_adamw_set_states(from_raw::AdamW(opt), from_raw::TensorList(states)));
   } IGNITE_HANDLE_EXCEPTION
-  return (void*) NULL;
+  
 }
-torch::Tensor adamw_state_exp_avg (adamw_state state);
-IGNITE_API void* _adamw_state_exp_avg (void* state) {
-  try {
-    return  make_raw::Tensor(adamw_state_exp_avg(from_raw::AdamWState(state)));
-  } IGNITE_HANDLE_EXCEPTION
-  return (void*) NULL;
-}
-torch::Tensor adamw_state_exp_avg_sq (adamw_state state);
-IGNITE_API void* _adamw_state_exp_avg_sq (void* state) {
-  try {
-    return  make_raw::Tensor(adamw_state_exp_avg_sq(from_raw::AdamWState(state)));
-  } IGNITE_HANDLE_EXCEPTION
-  return (void*) NULL;
-}
-torch::Tensor adamw_state_max_exp_avg_sq (adamw_state state);
-IGNITE_API void* _adamw_state_max_exp_avg_sq (void* state) {
-  try {
-    return  make_raw::Tensor(adamw_state_max_exp_avg_sq(from_raw::AdamWState(state)));
-  } IGNITE_HANDLE_EXCEPTION
-  return (void*) NULL;
-}
-torch::Tensor adamw_state_step (adamw_state state);
-IGNITE_API void* _adamw_state_step (void* state) {
-  try {
-    return  make_raw::Tensor(adamw_state_step(from_raw::AdamWState(state)));
-  } IGNITE_HANDLE_EXCEPTION
-  return (void*) NULL;
-}
-std::vector<torch::Tensor> ignite_opt_step (script_module network, script_module loss_fn, torch_stack input, torch::Tensor target, optim optimizer);
+std::vector<torch::Tensor> ignite_opt_step (script_module network, script_module loss_fn, torch_stack input, torch::Tensor target, optim_adamw optimizer);
 IGNITE_API void* _ignite_opt_step (void* network, void* loss_fn, void* input, void* target, void* optimizer) {
   try {
-    return  make_raw::TensorList(ignite_opt_step(from_raw::ScriptModule(network), from_raw::ScriptModule(loss_fn), from_raw::TorchStack(input), from_raw::Tensor(target), from_raw::Optim(optimizer)));
+    return  make_raw::TensorList(ignite_opt_step(from_raw::ScriptModule(network), from_raw::ScriptModule(loss_fn), from_raw::TorchStack(input), from_raw::Tensor(target), from_raw::AdamW(optimizer)));
   } IGNITE_HANDLE_EXCEPTION
   return (void*) NULL;
 }
@@ -175,24 +154,10 @@ IGNITE_API void _delete_optim_param_group (void* x) {
   } IGNITE_HANDLE_EXCEPTION
   
 }
-void delete_adamw_param_groups (void* x);
-IGNITE_API void _delete_adamw_param_groups (void* x) {
-  try {
-     (delete_adamw_param_groups(x));
-  } IGNITE_HANDLE_EXCEPTION
-  
-}
 void delete_adamw_param_group (void* x);
 IGNITE_API void _delete_adamw_param_group (void* x) {
   try {
      (delete_adamw_param_group(x));
-  } IGNITE_HANDLE_EXCEPTION
-  
-}
-void delete_adamw_states (void* x);
-IGNITE_API void _delete_adamw_states (void* x) {
-  try {
-     (delete_adamw_states(x));
   } IGNITE_HANDLE_EXCEPTION
   
 }

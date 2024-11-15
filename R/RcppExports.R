@@ -5,40 +5,20 @@ rcpp_ignite_adamw_get_param_groups <- function(groups) {
     .Call('_ignite_rcpp_ignite_adamw_get_param_groups', PACKAGE = 'ignite', groups)
 }
 
-rcpp_ignite_optim_get_param_group_params <- function(group) {
-    .Call('_ignite_rcpp_ignite_optim_get_param_group_params', PACKAGE = 'ignite', group)
+rcpp_ignite_adamw_param_groups_size <- function(groups) {
+    .Call('_ignite_rcpp_ignite_adamw_param_groups_size', PACKAGE = 'ignite', groups)
 }
 
-rcpp_ignite_adamw_get_param_group_options <- function(group) {
-    .Call('_ignite_rcpp_ignite_adamw_get_param_group_options', PACKAGE = 'ignite', group)
-}
-
-rcpp_ignite_adamw_set_param_group_options <- function(opt, i, options) {
-    invisible(.Call('_ignite_rcpp_ignite_adamw_set_param_group_options', PACKAGE = 'ignite', opt, i, options))
+rcpp_ignite_optim_get_param_group_params <- function(groups, i) {
+    .Call('_ignite_rcpp_ignite_optim_get_param_group_params', PACKAGE = 'ignite', groups, i)
 }
 
 rcpp_ignite_adamw_get_states <- function(opt) {
     .Call('_ignite_rcpp_ignite_adamw_get_states', PACKAGE = 'ignite', opt)
 }
 
-rcpp_ignite_adamw_get_state <- function(state) {
-    .Call('_ignite_rcpp_ignite_adamw_get_state', PACKAGE = 'ignite', state)
-}
-
-rcpp_adamw_state_exp_avg <- function(state) {
-    .Call('_ignite_rcpp_adamw_state_exp_avg', PACKAGE = 'ignite', state)
-}
-
-rcpp_adamw_state_exp_avg_sq <- function(state) {
-    .Call('_ignite_rcpp_adamw_state_exp_avg_sq', PACKAGE = 'ignite', state)
-}
-
-rcpp_adamw_state_max_exp_avg_sq <- function(state) {
-    .Call('_ignite_rcpp_adamw_state_max_exp_avg_sq', PACKAGE = 'ignite', state)
-}
-
-rcpp_adamw_state_step <- function(state) {
-    .Call('_ignite_rcpp_adamw_state_step', PACKAGE = 'ignite', state)
+rcpp_ignite_adamw_set_states <- function(opt, states) {
+    invisible(.Call('_ignite_rcpp_ignite_adamw_set_states', PACKAGE = 'ignite', opt, states))
 }
 
 rcpp_ignite_opt_step <- function(network, loss_fn, input, target, optimizer) {
@@ -93,16 +73,8 @@ rcpp_delete_optim_param_group <- function(x) {
     invisible(.Call('_ignite_rcpp_delete_optim_param_group', PACKAGE = 'ignite', x))
 }
 
-rcpp_delete_adamw_param_groups <- function(x) {
-    invisible(.Call('_ignite_rcpp_delete_adamw_param_groups', PACKAGE = 'ignite', x))
-}
-
 rcpp_delete_adamw_param_group <- function(x) {
     invisible(.Call('_ignite_rcpp_delete_adamw_param_group', PACKAGE = 'ignite', x))
-}
-
-rcpp_delete_adamw_states <- function(x) {
-    invisible(.Call('_ignite_rcpp_delete_adamw_states', PACKAGE = 'ignite', x))
 }
 
 rcpp_delete_adamw_state <- function(x) {
@@ -115,5 +87,9 @@ rcpp_delete_adamw_options <- function(x) {
 
 ignite_raise_exception <- function() {
     invisible(.Call('_ignite_ignite_raise_exception', PACKAGE = 'ignite'))
+}
+
+rcpp_ignite_adamw_set_param_group_options <- function(opt, list) {
+    invisible(.Call('_ignite_rcpp_ignite_adamw_set_param_group_options', PACKAGE = 'ignite', opt, list))
 }
 

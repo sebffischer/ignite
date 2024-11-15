@@ -43,7 +43,7 @@ void* TorchStack(const torch_stack& x) {
     return x;
 }
 void* OptimParamGroups(const optim_param_groups& x) {
-    return make_ptr<optim_param_groups>(x);
+    return x;
 }
 void* OptimParamGroup(const optim_param_group& x) {
     return x;
@@ -52,23 +52,16 @@ void* AdamWParamGroup(const adamw_param_group& x) {
     return x;
 }
 void* AdamWParamGroups(const adamw_param_groups& x) {
-    // TODO: I think we need to access the groups here
-    return make_ptr<adamw_param_groups>(x);
-}
-void* AdamWStates(const adamw_states& x) {
-    return make_ptr<adamw_states>(x);
-}
-void* AdamWState(const adamw_state& x) {
-    return x;
-}
-void* AdamWOptions(const adamw_options& x) {
-    return make_ptr<adamw_options>(x);
+    // x is a stack-allocated struct that only contains a pointer to the groups, no
+    // memory management needed as we get rid of the struct here.
+    return x.groups;
 }
 void* OptimOptions(const optim_options& x) {
     return x;
 }
-void* StringVector(const string_vector& x) {
-    return make_ptr<string_vector>(x);
+// TODO: This should not be necessary but maybe torchexport requires it?
+adamw_options AdamWOptions(const adamw_options& x) {
+    return x;
 }
 }
 
@@ -98,25 +91,27 @@ torch_stack TorchStack(void* x) {
     return reinterpret_cast<torch_stack>(x);
 }
 optim_param_groups OptimParamGroups(void* x) {
-    return *reinterpret_cast<optim_param_groups*>(x);
+    return reinterpret_cast<optim_param_groups>(x);
 }
 optim_param_group OptimParamGroup(void* x) {
     return *reinterpret_cast<optim_param_group*>(x);
 }
-adamw_states AdamWStates(void* x) {
-    return *reinterpret_cast<adamw_states*>(x);
-}
-adamw_state AdamWState(void* x) {
-    return *reinterpret_cast<adamw_state*>(x);
-}
-adamw_options AdamWOptions(void* x) {
-    return *reinterpret_cast<adamw_options*>(x);
+adamw_options AdamWOptions(const adamw_options& x) {
+    return x;
 }
 optim_options OptimOptions(void* x) {
     return *reinterpret_cast<optim_options*>(x);
 }
-string_vector StringVector(void* x) {
-    return *reinterpret_cast<string_vector*>(x);
+adamw_param_groups AdamWParamGroups(void* x) {
+    // x is a std::vector<torch::optim::OptimizerParamGroup>*
+    auto x_ptr = reinterpret_cast<std::vector<torch::optim::OptimizerParamGroup>*>(x);
+    // now wrap it in adamw_param_groups
+    adamw_param_groups groups;
+    groups.groups = x_ptr;
+    return groups;
+}
+adamw_param_group AdamWParamGroup(void* x) {
+    return *reinterpret_cast<adamw_param_group*>(x);
 }
 }
 
@@ -155,17 +150,8 @@ void delete_optim_param_group(void* x) {
   delete reinterpret_cast<optim_param_group*>(x);
 }
 // [[torch::export]]
-void delete_adamw_param_groups(void* x) {
-  delete reinterpret_cast<adamw_param_groups*>(x);
-}
-// [[torch::export]]
 void delete_adamw_param_group(void* x) {
   delete reinterpret_cast<adamw_param_group*>(x);
-}
-
-// [[torch::export]]
-void delete_adamw_states(void* x) {
-  delete reinterpret_cast<adamw_states*>(x);
 }
 
 // [[torch::export]]

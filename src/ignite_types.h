@@ -34,6 +34,7 @@ public:
   void* get ();
 };
 
+// TODO: no need to make it shared pointer as we the memory is owned by the optimizer
 class optim_param_groups {
 public:
   std::shared_ptr<void> ptr;
@@ -111,28 +112,6 @@ public:
 };
 
 
-// TODO: I don't think we need full implementations here as this is only used internally
-// probably no need
-class adamw_state {
-public:
-  std::shared_ptr<void> ptr;
-  adamw_state (void* x);
-  adamw_state (std::shared_ptr<void> x) : ptr(x) {}
-  adamw_state (SEXP x);
-  operator SEXP () const;
-  void* get ();
-};
-class adamw_states {
-public:
-  std::shared_ptr<void> ptr;
-  adamw_states (void* x);
-  adamw_states (std::shared_ptr<void> x) : ptr(x) {};
-  adamw_states (SEXP x);
-  operator SEXP () const;
-  void* get ();
-};
-
-
 class optim_options {
 public:
   void* ptr;
@@ -140,22 +119,6 @@ public:
   void* get ();
 };
 
-class adamw_options {
-public:
-  struct adamw_options_inner {
-    double lr;
-    double weight_decay;
-    std::tuple<double, double> betas;
-    double eps;
-    bool amsgrad;
-  };
-  std::shared_ptr<void> ptr;
-  adamw_options (void* x);
-  adamw_options (std::shared_ptr<void> x) : ptr(x) {};
-  adamw_options (SEXP x);
-  operator SEXP () const;
-  void* get ();
-};
 }
 
 

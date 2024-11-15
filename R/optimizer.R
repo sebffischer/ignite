@@ -126,15 +126,28 @@ optim_ignite_adamw <- optimizer_ignite(
     # we need to pass the addresses of the external pointers to the C++ Code
 
 
+    states = rcpp_ignite_adamw_get_states(self$ptr)
+
+    states = lapply(seq(1, length(states), by = 4), function(i) {
+      list(
+        exp_avg = states[[i]],
+        exp_avg_sq = states[[i + 1]],
+        max_exp_avg_sq = states[[i + 2]],
+        step = states[[i + 3]]
+      )
+    })
+
 
     list(
       param_groups = param_groups,
-      states = rcpp_ignite_adamw_get_states(self$ptr)
+      states = states
     )
   },
   load_state_dict = function(state_dict) {
     self$param_groups = state_dict$param_groups
-    rcpp_ignite_adamw_set_states(self$ptr, state_dict$states)
+
+    states = unlist(state_dict$states)
+    rcpp_ignite_adamw_set_states(self$ptr, states)
     invisible(self)
   },
   step = function() {
@@ -147,10 +160,8 @@ optim_ignite_adamw <- optimizer_ignite(
     # TODO: Add the params as an integer vector.
     param_groups = function(rhs) {
       if (!missing(rhs)) {
-        for (i in seq_along(rhs)) {
-          # TODO: Checks that parameters are identical + other checks
-          rcpp_ignite_adamw_set_param_group_options(self$get_ptr(), i, rhs[[i]])
-        }
+        # TODO: Check that params are not changed.
+        rcpp_ignite_adamw_set_param_group_options(self$get_ptr(), rhs)
       }
       rcpp_ignite_adamw_get_param_groups(self$get_ptr())
     }
